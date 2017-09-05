@@ -24,6 +24,9 @@ namespace RumoPatios.Models
         public ApplicationDbContext()
             : base("DefaultConnection", throwIfV1Schema: false)
         {
+            Database.SetInitializer<ApplicationDbContext>(null);// Remove default initializer
+            Configuration.ProxyCreationEnabled = false;
+            Configuration.LazyLoadingEnabled = false;
         }
 
         public DbSet<Carregamento> Carregamentos { get; set; }
@@ -38,6 +41,8 @@ namespace RumoPatios.Models
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
 
             //é melhor deixar esta convencao ativada, pois quando da erro, ele avisa logo no update database que já existe um cascade delete (e na mensagem de erro ele fala exatamente qual o FK que da problema), então é só mudar para cascadeDelete para 'false' no migration que acabou de ser criado
