@@ -10,6 +10,7 @@ namespace RumoPatios.Controllers
     {
         public ActionResult Index()
         {
+            //TODO: criar o view model com todas as tabelas
             return View();
         }
 
