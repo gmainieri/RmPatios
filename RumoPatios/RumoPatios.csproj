@@ -168,6 +168,10 @@
     <Compile Include="Migrations\201709050014010_initial.Designer.cs">
       <DependentUpon>201709050014010_initial.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201709052343324_qtdeVagoesEmLinha.cs" />
+    <Compile Include="Migrations\201709052343324_qtdeVagoesEmLinha.Designer.cs">
+      <DependentUpon>201709052343324_qtdeVagoesEmLinha.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Carregamento.cs" />
@@ -253,6 +257,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201709050014010_initial.resx">
       <DependentUpon>201709050014010_initial.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201709052343324_qtdeVagoesEmLinha.resx">
+      <DependentUpon>201709052343324_qtdeVagoesEmLinha.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

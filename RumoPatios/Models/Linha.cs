@@ -18,6 +18,16 @@ namespace RumoPatios.Models
         public int Capacidade { get; set; }
 
         /// <summary>
+        /// capacidade (em vagões) da linha
+        /// </summary>
+        public int QtdeVagoesVazios { get; set; }
+
+        /// <summary>
+        /// capacidade (em vagões) da linha
+        /// </summary>
+        public int QtdeVagoesCarregados { get; set; }
+
+        /// <summary>
         /// comprimento da linha (em metros?)
         /// </summary>
         public int Comprimento { get; set; }
