@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
+using System.Data.Entity.ModelConfiguration.Conventions;
 
 namespace RumoPatios.Models
 {
@@ -25,9 +26,24 @@ namespace RumoPatios.Models
         {
         }
 
+        public DbSet<Carregamento> Carregamentos { get; set; }
+        public DbSet<Partida> Partidas { get; set; }
+        public DbSet<Chegada> Chegadas { get; set; }
+        public DbSet<Linha> Linhas { get; set; }
+
         public static ApplicationDbContext Create()
         {
             return new ApplicationDbContext();
         }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
+
+            //é melhor deixar esta convencao ativada, pois quando da erro, ele avisa logo no update database que já existe um cascade delete (e na mensagem de erro ele fala exatamente qual o FK que da problema), então é só mudar para cascadeDelete para 'false' no migration que acabou de ser criado
+            //modelBuilder.Conventions.Remove<OneToManyCascadeDeleteConvention>(); 
+            //ao remover esta condição, o erro só aparece no delete quando algo fica orfão
+        }
     }
+
 }

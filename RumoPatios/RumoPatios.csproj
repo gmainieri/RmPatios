@@ -165,8 +165,14 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\Carregamento.cs" />
+    <Compile Include="Models\Chegada.cs" />
+    <Compile Include="Models\Evento.cs" />
     <Compile Include="Models\IdentityModels.cs" />
+    <Compile Include="Models\Linha.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
+    <Compile Include="Models\Partida.cs" />
+    <Compile Include="Models\Vagao.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
@@ -191,7 +197,9 @@
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Scripts\_references.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
