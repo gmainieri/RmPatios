@@ -18,12 +18,10 @@ namespace RumoPatios.Models
         public int Capacidade { get; set; }
 
         /// <summary>
-        /// capacidade (em vagões) da linha
         /// </summary>
         public int QtdeVagoesVazios { get; set; }
 
         /// <summary>
-        /// capacidade (em vagões) da linha
         /// </summary>
         public int QtdeVagoesCarregados { get; set; }
 
@@ -37,7 +35,7 @@ namespace RumoPatios.Models
         /// </summary>
         public string NomeTerminal { get; set; }
 
-        //public virtual ICollection<Carregamento> Carregamentos { get; set; }
+        public virtual ICollection<Carregamento> Carregamentos { get; set; }
 
         [NotMapped]
         public LinkedList<Vagao> listaDeVagoes { get; set; }

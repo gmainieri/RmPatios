@@ -19,8 +19,8 @@ namespace RumoPatios.Models
 
         public string Cliente { get; set; }
 
-        //public int LinhaID { get; set; }
-        //public virtual Linha Linha { get; set; }
+        public int LinhaID { get; set; }
+        public virtual Linha Linha { get; set; }
 
     }
 }
