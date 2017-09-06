@@ -25,7 +25,8 @@ namespace RumoPatios.Migrations
                 new Chegada { prefixo = "D36", HorarioChegada = DateTime.Parse("16/08/2017 10:00"), QtdeVagoesCarregados = 80, QtdeVagoesVazio = 0 },
                 new Chegada { prefixo = "D38", HorarioChegada = DateTime.Parse("16/08/2017 11:00"), QtdeVagoesCarregados = 78, QtdeVagoesVazio = 0 },
                 new Chegada { prefixo = "L04", HorarioChegada = DateTime.Parse("16/08/2017 13:00"), QtdeVagoesCarregados = 40, QtdeVagoesVazio = 20 },
-                new Chegada { prefixo = "D26", HorarioChegada = DateTime.Parse("16/08/2017 15:00"), QtdeVagoesCarregados = 79, QtdeVagoesVazio = 0 }
+                new Chegada { prefixo = "D26", HorarioChegada = DateTime.Parse("16/08/2017 15:00"), QtdeVagoesCarregados = 79, QtdeVagoesVazio = 0 },
+                new Chegada { prefixo = "K70", HorarioChegada = DateTime.Parse("16/08/2017 20:00"), QtdeVagoesCarregados = 80, QtdeVagoesVazio = 0 }
                 );
 
             context.Partidas.AddOrUpdate(

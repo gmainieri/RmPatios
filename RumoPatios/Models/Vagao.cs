@@ -12,7 +12,7 @@ namespace RumoPatios.Models
         internal string nome { get; set; }
 
         /// <summary>
-        /// 0 - vagao, 1 - LM, 2 - LT
+        /// 1 - vagao, 2 - LM, 3 - LT
         /// </summary>
         internal int tipo { get; set; }
 
