@@ -12,6 +12,7 @@ namespace RumoPatios.Models
 
         public DateTime HorarioPartida { get; set; }
 
+        public string prefixo { get; set; }
         public int QtdeVagoesCarregados { get; set; }
         public int QtdeVagoesVazio { get; set; }
 
