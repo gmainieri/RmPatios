@@ -38,6 +38,18 @@ namespace RumoPatios.Models
         public virtual ICollection<Carregamento> Carregamentos { get; set; }
 
         [NotMapped]
-        public LinkedList<Vagao> listaDeVagoes { get; set; }
+        public DateTime instanteDeLiberacao { get; set; }
+
+        [NotMapped]
+        public int vagoesVaziosAtual { get; set; }
+
+        [NotMapped]
+        public int vagoesCarregadosAtual { get; set; }
+
+        [NotMapped]
+        public double aleatorio { get; set; }
+
+        //[NotMapped]
+        //public LinkedList<VagaoLM> listaDeVagoes { get; set; }
     }
 }

@@ -23,7 +23,7 @@ namespace RumoPatios.Models
             this.instante = _chegada.HorarioChegada;
         }
 
-        public Evento(Vagao _vagao, DateTime inst)
+        public Evento(VagaoLM _vagao, DateTime inst)
         {
             this.vagao = _vagao;
             this.instante = inst;
@@ -38,7 +38,7 @@ namespace RumoPatios.Models
         internal DateTime instante { get; set; }
 
         #region se for uma liberação, o evento está associado a um recurso (vagao ou linha)
-        internal Vagao vagao { get; set; }
+        internal VagaoLM vagao { get; set; }
         internal Linha linha { get; set; } 
         #endregion
 

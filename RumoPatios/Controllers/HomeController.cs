@@ -53,6 +53,8 @@ namespace RumoPatios.Controllers
 
         internal ResultadoOtimizaData Otimizador()
         {
+            var rnd = new Random(1978);
+
             var cargaDescarga = 10; //Considere uma descarga/carregamento de 10 vgs/hora, para todos terminais
             var tempoMovEntreLinhas = 30; //minutos
             var maxMovParalelo = 5; //ou seja, tenho 5 LM
@@ -71,6 +73,7 @@ namespace RumoPatios.Controllers
             //var primeiraChegada = chegadas.Min(x => x.HorarioChegada);
 
             var timeLine = new List<Evento>();
+            
 
             foreach (var carrega in carregamentos)
             {
@@ -82,25 +85,103 @@ namespace RumoPatios.Controllers
                 timeLine.Add(new Evento(chega));
             }
 
-            timeLine.Sort((x, y) => x.instante.CompareTo(y.instante));
+            //timeLine.Sort((x, y) => x.instante.CompareTo(y.instante));
 
-            var primeiroEvento = timeLine.Min(x => x.instante);
-            var vagoesLM = new List<Vagao>();
+            var instantePrimeiroEvento = timeLine.Min(x => x.instante);
+            var vagoesLM = new List<VagaoLM>(); //como vagao nao é uma classe do banco, tenho que criar
+            //var vagoesLmLivres = new List<Evento>();
+            //var linhasCarregamentoLivres = new List<Evento>();
+
+            var carregamentosEncaminhados = new List<Carregamento>();
+            var chegadasEncaminhadas = new List<Chegada>();
 
             for(int i = 0; i < maxMovParalelo; i++)
             {
-                var novoVagao = new Vagao { Idx = i, nome = "LM", tipo = 2 };
+                var novoVagao = new VagaoLM (i, instantePrimeiroEvento);
                 vagoesLM.Add(novoVagao);
-                timeLine.Add(new Evento(novoVagao, primeiroEvento));
+                //vagoesLmLivres.Add(new Evento(novoVagao, instantePrimeiroEvento));
             }
 
-            foreach(var line in linhasDeCarregamento)
+            foreach (var line in linhasDeCarregamento)
             {
-                timeLine.Add(new Evento(line, primeiroEvento));
+                line.instanteDeLiberacao = instantePrimeiroEvento; //todas as linhas de carregamento estao livres em t = 0
+                //linhasCarregamentoLivres.Add(new Evento(line, instantePrimeiroEvento));
+            }
+
+            foreach(var line in linhasDeManobra)
+            {
+                line.vagoesVaziosAtual = line.QtdeVagoesVazios;
+                line.vagoesCarregadosAtual = line.QtdeVagoesCarregados;
+                line.aleatorio = rnd.NextDouble();
             }
 
             timeLine.Sort((x, y) => x.instante.CompareTo(y.instante));
+            //vagoesLM.Sort((x, y) => x.instanteDeLiberacao.CompareTo(y.instanteDeLiberacao));
+            //linhasDeCarregamento.Sort((x, y) => x.instanteDeLiberacao.CompareTo(y.instanteDeLiberacao));
+            //timeLine = timeLine.OrderBy(x => x.instante)
+            //    .ThenBy(x => x.chegada == null ? 9999 : x.chegada.ChegadaID)
+            //    .ThenBy(x => x.carregamento == null ? 9999 : x.carregamento.CarregamentoID)
+            //    .ToList();
             
+            while(timeLine.Any())
+            {
+                var carregamento = timeLine[0].carregamento;
+                var chegada = timeLine[0].chegada;
+
+                var qtdeAtualVagoesVazios = linhasDeManobra.Sum(x => x.vagoesVaziosAtual);
+                var qtdeAtualVagoesCarregados = linhasDeManobra.Sum(x => x.vagoesCarregadosAtual);
+
+                if(carregamento != null)
+                {
+                    var qtdeMinVagoesLM = (int) Math.Ceiling((double) carregamento.QtdeVagoes / maxVagoesMov);
+
+                    if (qtdeMinVagoesLM > vagoesLM.Count)
+                        break; //nunca deve acontecer
+
+                    if (qtdeAtualVagoesVazios < carregamento.QtdeVagoes)
+                        break; //para debugar (provavelmente não deve acontecer, complica um pouco se acontecer, pq teriamos que colocar o carregamento em espera)
+
+                    var quantidadesDeVagoesPorLinha = (int) Math.Floor((double)carregamento.QtdeVagoes / qtdeMinVagoesLM);
+
+                    #region escolher de quais linhas virao os vagoes e atualizar as quantidades nestas linhas
+
+                    var linhasEmOrdem = linhasDeCarregamento.OrderBy(x => x.aleatorio).ToList();
+
+                    foreach(var linhaC in linhasEmOrdem)
+                    {
+                        if(linhaC.vagoesVaziosAtual >= quantidadesDeVagoesPorLinha)
+                        {
+                            linhaC.instanteDeLiberacao.AddMinutes(tempoMovEntreLinhas);
+                        }
+                    }
+
+                    
+                    #endregion
+
+                    #region atualizo os instantes de liberacao dos vagoes ocupados
+                    for (int i = 0; i < qtdeMinVagoesLM; i++)
+                    {
+                        vagoesLM[i].instanteDeLiberacao.AddMinutes(tempoMovEntreLinhas);
+                    } 
+                    #endregion
+
+                    vagoesLM.Sort((x, y) => x.instanteDeLiberacao.CompareTo(y.instanteDeLiberacao));
+                    carregamentosEncaminhados.Add(carregamento);
+                }
+
+                if(chegada != null)
+                {
+                    //uma chegada implica em decidir em quais linhas de manobra alocar os vagoes
+                    //uma chegada implica em mais vagoes carregados que precisam ser descarregados
+                    chegadasEncaminhadas.Add(chegada);
+                }
+
+                //em todo o instante de decisao, eu preciso ver se existem vagoes carregados, se existem LMs e linhas de descarga livres para descarrega-los
+
+                timeLine.RemoveAt(0);
+                continue;
+            }
+
             var result = new ResultadoOtimizaData();
             return result;
         }
