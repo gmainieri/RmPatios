@@ -2,6 +2,7 @@
 
 @{
     ViewBag.Title = "Home Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 @*<div class="jumbotron">
@@ -38,7 +39,7 @@
                 </th>
             </tr>
         </thead>
-        <tbody class="searchable">
+        <tbody>
             @foreach (var item in Model.linhas)
             {
                 <tr>
