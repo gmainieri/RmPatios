@@ -66,7 +66,7 @@ namespace RumoPatios.Controllers
             var chegadas = db.Chegadas.ToList();
             var linhas = db.Linhas.ToList();
 
-            var linhasDeCarregamento = linhas.Where(x => String.IsNullOrEmpty(x.NomeTerminal) == false).ToList();
+            var linhasTerminais = linhas.Where(x => String.IsNullOrEmpty(x.NomeTerminal) == false).ToList();
             var linhasDeManobra = linhas.Where(x => String.IsNullOrEmpty(x.NomeTerminal) == true).ToList();
 
             //var primeiroCarregamento = carregamentos.Min(x => x.HorarioCarregamento);
@@ -102,7 +102,7 @@ namespace RumoPatios.Controllers
                 //vagoesLmLivres.Add(new Evento(novoVagao, instantePrimeiroEvento));
             }
 
-            foreach (var line in linhasDeCarregamento)
+            foreach (var line in linhasTerminais)
             {
                 line.instanteDeLiberacao = instantePrimeiroEvento; //todas as linhas de carregamento estao livres em t = 0
                 //linhasCarregamentoLivres.Add(new Evento(line, instantePrimeiroEvento));
@@ -133,33 +133,38 @@ namespace RumoPatios.Controllers
 
                 if(carregamento != null)
                 {
-                    var qtdeMinVagoesLM = (int) Math.Ceiling((double) carregamento.QtdeVagoes / maxVagoesMov);
+                    //var qtdeMinVagoesLM = (int) Math.Ceiling((double) carregamento.QtdeVagoes / maxVagoesMov);
 
-                    if (qtdeMinVagoesLM > vagoesLM.Count)
-                        break; //nunca deve acontecer
+                    //if (qtdeMinVagoesLM > vagoesLM.Count)
+                    //    break; //nunca deve acontecer
 
                     if (qtdeAtualVagoesVazios < carregamento.QtdeVagoes)
                         break; //para debugar (provavelmente não deve acontecer, complica um pouco se acontecer, pq teriamos que colocar o carregamento em espera)
 
-                    var quantidadesDeVagoesPorLinha = (int) Math.Floor((double)carregamento.QtdeVagoes / qtdeMinVagoesLM);
+                    var quantidadesDeVagoesVaziosPorLinha = (int)Math.Floor((double)carregamento.QtdeVagoes / vagoesLM.Count);
 
                     #region escolher de quais linhas virao os vagoes e atualizar as quantidades nestas linhas
 
-                    var linhasEmOrdem = linhasDeCarregamento.OrderBy(x => x.aleatorio).ToList();
+                    var linhasDeManobraEmOrdem = linhasDeManobra.Where(x => x.vagoesVaziosAtual >= quantidadesDeVagoesVaziosPorLinha).OrderBy(x => x.aleatorio).ToList();
 
-                    foreach(var linhaC in linhasEmOrdem)
+                    if (linhasDeManobraEmOrdem.Count() < vagoesLM.Count)
+                        break; //não existem n linhas com pelo menos X quantidade de vagoes vazios por linha
+
+                    foreach(var linhaM in linhasDeManobraEmOrdem)
                     {
-                        if(linhaC.vagoesVaziosAtual >= quantidadesDeVagoesPorLinha)
-                        {
-                            linhaC.instanteDeLiberacao.AddMinutes(tempoMovEntreLinhas);
-                        }
+                        linhaM.QtdeVagoesVazios -= quantidadesDeVagoesVaziosPorLinha;
+                    }
+
+                    foreach(var linhaT in linhasTerminais)
+                    {
+                        linhaT.instanteDeLiberacao.AddMinutes(tempoMovEntreLinhas); //adicionar o tempo de carregamento
                     }
 
                     
                     #endregion
 
                     #region atualizo os instantes de liberacao dos vagoes ocupados
-                    for (int i = 0; i < qtdeMinVagoesLM; i++)
+                    for (int i = 0; i < vagoesLM.Count; i++)
                     {
                         vagoesLM[i].instanteDeLiberacao.AddMinutes(tempoMovEntreLinhas);
                     } 
@@ -173,10 +178,10 @@ namespace RumoPatios.Controllers
                 {
                     //uma chegada implica em decidir em quais linhas de manobra alocar os vagoes
                     //uma chegada implica em mais vagoes carregados que precisam ser descarregados
+                    //ja neste instante, preciso providenciar as descargas dos vagoes do patio e que acabaram de chegar
                     chegadasEncaminhadas.Add(chegada);
                 }
 
-                //em todo o instante de decisao, eu preciso ver se existem vagoes carregados, se existem LMs e linhas de descarga livres para descarrega-los
 
                 timeLine.RemoveAt(0);
                 continue;
