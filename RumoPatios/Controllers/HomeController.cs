@@ -1,4 +1,6 @@
-﻿using System;
+﻿using RumoPatios.Models;
+using RumoPatios.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -11,7 +13,12 @@ namespace RumoPatios.Controllers
         public ActionResult Index()
         {
             //TODO: criar o view model com todas as tabelas
-            return View();
+
+            var db = new ApplicationDbContext();
+
+            var vm = new TelaPrincipal(db);
+
+            return View("Index", vm);
         }
 
         public ActionResult About()

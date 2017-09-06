@@ -81,7 +81,7 @@ namespace RumoPatios.Migrations
                 new Carregamento { LinhaID = 3, Cliente = "Bunge", Produto = "Fertilizante", QtdeVagoes = 30, HorarioCarregamento = DateTime.Parse("16/08/2017 15:30") }
                 );
 
-            //  TODO: This method will be called after migrating to the latest version.
+            //  This method will be called after migrating to the latest version.
             //  You can use the DbSet<T>.AddOrUpdate() helper extension method 
             //  to avoid creating duplicate seed data. E.g.
             //
