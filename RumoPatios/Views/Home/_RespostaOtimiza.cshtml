@@ -1,0 +1,34 @@
+﻿@model RumoPatios.ViewModels.ResultadoOtimizaData
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div id="tabelaResposta" class="container">
+    <h1 class="text-center">
+        RESPOSTA OTIMIZAÇÃO
+    </h1>
+    <table class="table table-striped table-bordered table-responsive table-condensed table-hover sortable">
+        <thead>
+            <tr>
+                <th class="col-lg-3">
+                    Horario
+                </th>
+                <th class="col-lg-9">
+                    Ação
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.rows)
+            {
+                <tr>
+                    <td>@item.horario</td>
+                    <td>@item.acao</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

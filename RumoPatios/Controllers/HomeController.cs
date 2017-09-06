@@ -34,5 +34,20 @@ namespace RumoPatios.Controllers
 
             return View();
         }
+
+        public ActionResult ExecutaCompleto()
+        {
+            try
+            {
+                var vm = new ResultadoOtimizaData();
+                return View("_RespostaOtimiza", vm);
+            }
+            catch
+            {
+
+            }
+
+            return View();
+        }
     }
 }

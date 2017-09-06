@@ -11,6 +11,31 @@
     <p><a href="http://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
 </div>*@
 
+<div class="container" id="resposta">
+    <div class="row">
+        &nbsp;
+    </div>
+
+    <p class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <a class="btn btn-success" id="botaoOtimiza" href="javascript:void(0)" onclick="executaCompleto('true')">Otimizar</a>
+            </div>
+        </div>
+
+        @*col-md-offset-1*@
+        <div class="col-md-9">
+            <div class="form-group">
+                <span id="ajaxBusy" hidden>
+                    Calculando... <br>
+                    <img src="~/Content/Progressbar.gif">
+                </span>
+            </div>
+        </div>
+    </p>
+</div>
+
+
 
 <div id="tabelaPatio" class="container">
     <h1 class="text-center">
@@ -94,7 +119,6 @@
     </table>
 </div>
 
-
 <div id="tabelaChegadas" class="row">
     <h1 class="text-center">
         CHEGADAS
@@ -133,7 +157,6 @@
         </tbody>
     </table>
 </div>
-
 
 <div id="tabelaCarregamentos" class="row">
     <h1 class="text-center">
@@ -177,3 +200,18 @@
         </tbody>
     </table>
 </div>
+
+
+<script>
+    function executaCompleto(booleano) {
+        $('#ajaxBusy').show();
+
+        $.ajax({
+            url: "../Home/ExecutaCompleto",
+            success: function (data) {
+                $("#resposta").html(data);
+                $('#ajaxBusy').hide();
+            }
+        });
+    }
+</script>
