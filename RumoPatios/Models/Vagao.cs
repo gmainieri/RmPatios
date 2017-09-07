@@ -9,20 +9,25 @@ namespace RumoPatios.Models
     {
         internal int Idx { get; set; }
 
-        internal DateTime instanteDeLiberacao { get; set; }
+        //internal DateTime instanteDeLiberacao { get; set; }
 
-        internal List<Carregamento> listaDeCarregamentos { get; set; }
+        //internal List<Carregamento> listaDeCarregamentos { get; set; }
 
         public VagaoLM()
         {
-            this.listaDeCarregamentos = new List<Carregamento>();
+            //this.listaDeCarregamentos = new List<Carregamento>();
         }
 
-        public VagaoLM(int idx, DateTime instante)
+        //public VagaoLM(int idx, DateTime instante)
+        //{
+        //    this.Idx = idx;
+        //    this.instanteDeLiberacao = instante;
+        //    this.listaDeCarregamentos = new List<Carregamento>();
+        //}
+
+        public VagaoLM(int idx)
         {
             this.Idx = idx;
-            this.instanteDeLiberacao = instante;
-            this.listaDeCarregamentos = new List<Carregamento>();
         }
 
     }
