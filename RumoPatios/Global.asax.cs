@@ -22,7 +22,7 @@ namespace RumoPatios
             var migrator = new DbMigrator(new RumoPatios.Migrations.Configuration());
             migrator.Update();
 #else
-            var migrator = new DbMigrator(new triAPI.Migrations.Configuration());
+            var migrator = new DbMigrator(new RumoPatios.Migrations.Configuration());
             migrator.Update();
 #endif
 

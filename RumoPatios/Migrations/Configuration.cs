@@ -18,24 +18,27 @@ namespace RumoPatios.Migrations
         {
             context.Configuration.AutoDetectChangesEnabled = false;
 
+            var cultura = System.Globalization.CultureInfo.CreateSpecificCulture("pt-BR");
+            //var formato = "dd/MM/yyyy hh:mm";
+
             context.Chegadas.AddOrUpdate(
                 x => x.prefixo,
-                new Chegada { prefixo = "D34", HorarioChegada = DateTime.Parse("16/08/2017 04:00"), QtdeVagoesCarregados = 91, QtdeVagoesVazio = 0 },
-                new Chegada { prefixo = "D02", HorarioChegada = DateTime.Parse("16/08/2017 07:00"), QtdeVagoesCarregados = 83, QtdeVagoesVazio = 0 },
-                new Chegada { prefixo = "D36", HorarioChegada = DateTime.Parse("16/08/2017 10:00"), QtdeVagoesCarregados = 80, QtdeVagoesVazio = 0 },
-                new Chegada { prefixo = "D38", HorarioChegada = DateTime.Parse("16/08/2017 11:00"), QtdeVagoesCarregados = 78, QtdeVagoesVazio = 0 },
-                new Chegada { prefixo = "L04", HorarioChegada = DateTime.Parse("16/08/2017 13:00"), QtdeVagoesCarregados = 40, QtdeVagoesVazio = 20 },
-                new Chegada { prefixo = "D26", HorarioChegada = DateTime.Parse("16/08/2017 15:00"), QtdeVagoesCarregados = 79, QtdeVagoesVazio = 0 },
-                new Chegada { prefixo = "K70", HorarioChegada = DateTime.Parse("16/08/2017 20:00"), QtdeVagoesCarregados = 80, QtdeVagoesVazio = 0 }
+                new Chegada { prefixo = "D34", HorarioChegada = DateTime.Parse("16/08/2017 04:00", cultura), QtdeVagoesCarregados = 91, QtdeVagoesVazio = 0 },
+                new Chegada { prefixo = "D02", HorarioChegada = DateTime.Parse("16/08/2017 07:00", cultura), QtdeVagoesCarregados = 83, QtdeVagoesVazio = 0 },
+                new Chegada { prefixo = "D36", HorarioChegada = DateTime.Parse("16/08/2017 10:00", cultura), QtdeVagoesCarregados = 80, QtdeVagoesVazio = 0 },
+                new Chegada { prefixo = "D38", HorarioChegada = DateTime.Parse("16/08/2017 11:00", cultura), QtdeVagoesCarregados = 78, QtdeVagoesVazio = 0 },
+                new Chegada { prefixo = "L04", HorarioChegada = DateTime.Parse("16/08/2017 13:00", cultura), QtdeVagoesCarregados = 40, QtdeVagoesVazio = 20 },
+                new Chegada { prefixo = "D26", HorarioChegada = DateTime.Parse("16/08/2017 15:00", cultura), QtdeVagoesCarregados = 79, QtdeVagoesVazio = 0 },
+                new Chegada { prefixo = "K70", HorarioChegada = DateTime.Parse("16/08/2017 20:00", cultura), QtdeVagoesCarregados = 80, QtdeVagoesVazio = 0 }
                 );
 
             context.Partidas.AddOrUpdate(
                 x => x.prefixo,
-                new Partida { prefixo = "M33", HorarioPartida = DateTime.Parse("16/08/2017 13:00"), QtdeVagoesCarregados = 0, QtdeVagoesVazio = 40 },
-                new Partida { prefixo = "M31", HorarioPartida = DateTime.Parse("16/08/2017 18:00"), QtdeVagoesCarregados = 60, QtdeVagoesVazio = 20 },
-                new Partida { prefixo = "L05", HorarioPartida = DateTime.Parse("16/08/2017 19:30"), QtdeVagoesCarregados = 70, QtdeVagoesVazio = 10 },
-                new Partida { prefixo = "M05", HorarioPartida = DateTime.Parse("16/08/2017 22:00"), QtdeVagoesCarregados = 40, QtdeVagoesVazio = 40 },
-                new Partida { prefixo = "L07", HorarioPartida = DateTime.Parse("16/08/2017 23:30"), QtdeVagoesCarregados = 0, QtdeVagoesVazio = 40 }
+                new Partida { prefixo = "M33", HorarioPartida = DateTime.Parse("16/08/2017 13:00", cultura), QtdeVagoesCarregados = 0, QtdeVagoesVazio = 40 },
+                new Partida { prefixo = "M31", HorarioPartida = DateTime.Parse("16/08/2017 18:00", cultura), QtdeVagoesCarregados = 60, QtdeVagoesVazio = 20 },
+                new Partida { prefixo = "L05", HorarioPartida = DateTime.Parse("16/08/2017 19:30", cultura), QtdeVagoesCarregados = 70, QtdeVagoesVazio = 10 },
+                new Partida { prefixo = "M05", HorarioPartida = DateTime.Parse("16/08/2017 22:00", cultura), QtdeVagoesCarregados = 40, QtdeVagoesVazio = 40 },
+                new Partida { prefixo = "L07", HorarioPartida = DateTime.Parse("16/08/2017 23:30", cultura), QtdeVagoesCarregados = 0, QtdeVagoesVazio = 40 }
                 );
 
             var LinhasList = new List<Linha>();
@@ -77,9 +80,9 @@ namespace RumoPatios.Migrations
 
             context.Carregamentos.AddOrUpdate(
                 x => new { x.Terminal, x.Cliente, x.Produto },
-                new Carregamento { LinhaID = 4, Cliente = "Ipiranga", Produto = "Oleo vegetal", QtdeVagoes = 70, HorarioCarregamento = DateTime.Parse("16/08/2017 08:00") },
-                new Carregamento { LinhaID = 1, Cliente = "Cargill", Produto = "Fertilizante", QtdeVagoes = 40, HorarioCarregamento = DateTime.Parse("16/08/2017 14:00") },
-                new Carregamento { LinhaID = 3, Cliente = "Bunge", Produto = "Fertilizante", QtdeVagoes = 30, HorarioCarregamento = DateTime.Parse("16/08/2017 15:30") }
+                new Carregamento { LinhaID = 4, Cliente = "Ipiranga", Produto = "Oleo vegetal", QtdeVagoes = 70, HorarioCarregamento = DateTime.Parse("16/08/2017 08:00", cultura) },
+                new Carregamento { LinhaID = 1, Cliente = "Cargill", Produto = "Fertilizante", QtdeVagoes = 40, HorarioCarregamento = DateTime.Parse("16/08/2017 14:00", cultura) },
+                new Carregamento { LinhaID = 3, Cliente = "Bunge", Produto = "Fertilizante", QtdeVagoes = 30, HorarioCarregamento = DateTime.Parse("16/08/2017 15:30", cultura) }
                 );
 
             //  This method will be called after migrating to the latest version.
