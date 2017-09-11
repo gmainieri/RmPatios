@@ -10,6 +10,7 @@ namespace RumoPatios.Models
     /// </summary>
     public class Evento
     {
+        #region construtores
         public Evento(Carregamento _carregamento)
         {
             this.carregamento = _carregamento;
@@ -33,22 +34,23 @@ namespace RumoPatios.Models
         {
             this.linha = _linha;
             this.instante = inst;
-        }
+        } 
+        #endregion
 
+        #region propriedades
         internal DateTime instante { get; set; }
 
         #region se for uma liberação, o evento está associado a um recurso (vagao ou linha)
         internal VagaoLM vagao { get; set; }
-        internal Linha linha { get; set; } 
+        internal Linha linha { get; set; }
         #endregion
 
 
         #region caso contrario esta ligado a algum dos eventos do banco
         internal Chegada chegada { get; set; }
         internal Carregamento carregamento { get; set; }
-        internal Partida partida { get; set; } 
-        #endregion
-
+        internal Partida partida { get; set; }
+        #endregion 
 
         //internal int Idx { get; set; }
 
@@ -57,6 +59,6 @@ namespace RumoPatios.Models
         /// ainda não considerados: linha de partida liberada?, partida?
         /// </summary>
         //internal int tipo { get; set; }
-        
+        #endregion
     }
 }

@@ -114,7 +114,7 @@ namespace RumoPatios.Controllers
                 line.aleatorio = rnd.NextDouble();
             }
 
-            timeLine.Sort((x, y) => x.instante.CompareTo(y.instante));
+            //timeLine.Sort((x, y) => x.instante.CompareTo(y.instante));
             //vagoesLM.Sort((x, y) => x.instanteDeLiberacao.CompareTo(y.instanteDeLiberacao));
             //linhasDeCarregamento.Sort((x, y) => x.instanteDeLiberacao.CompareTo(y.instanteDeLiberacao));
             //timeLine = timeLine.OrderBy(x => x.instante)
@@ -122,13 +122,40 @@ namespace RumoPatios.Controllers
             //    .ThenBy(x => x.carregamento == null ? 9999 : x.carregamento.CarregamentoID)
             //    .ToList();
 
-            for (int i = 0; i < timeLine.Count - 1; i++)
-            {
-                var atual = timeLine[i];
-                var proximo = timeLine[i + 1];
-            }
 
+            while(timeLine.Any())
+            {
+                timeLine.Sort((x, y) => x.instante.CompareTo(y.instante));
+                var timeLineAgrupada = timeLine.GroupBy(x => x.instante).ToList();
+
+                foreach (var evento in timeLineAgrupada.First()) //para todos os eventos do instante mais recente
+                {
+                    if (evento.vagao != null)
+                    {
+                    }
+                    else if (evento.linha != null)
+                    {
+                    }
+                    else if(evento.carregamento != null)
+                    {
+                    }
+                    else if(evento.chegada != null)
+                    {
+                    }
+
+                    timeLine.Remove(evento);
+                }
+                
+            }
+            
             #region v0 linha do tempo
+
+            //for (int i = 0; i < timeLine.Count - 1; i++)
+            //{
+            //    var atual = timeLine[i];
+            //    var proximo = timeLine[i + 1];
+            //}
+
             //while (timeLine.Any())
             //{
             //    var carregamento = timeLine[0].carregamento;
