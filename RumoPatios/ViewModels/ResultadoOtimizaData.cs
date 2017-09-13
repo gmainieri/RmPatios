@@ -25,6 +25,7 @@ namespace RumoPatios.ViewModels
     {
         public DateTime horario { get; set; }
         public string acao { get; set; }
+        public int qtdeManobras { get; set; }
 
         public ResultadoOtimizaDataRow()
         {
@@ -38,10 +39,11 @@ namespace RumoPatios.ViewModels
         //    this.acao = "";
         //}
 
-        public ResultadoOtimizaDataRow(DateTime instante, string Acao)
+        public ResultadoOtimizaDataRow(DateTime instante, string Acao, int nManobras)
         {
             this.horario = instante;
             this.acao = Acao;
+            this.qtdeManobras = nManobras;
         }
     }
 }

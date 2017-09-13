@@ -189,6 +189,7 @@
     <Compile Include="Models\Linha.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\Partida.cs" />
+    <Compile Include="Models\Tarefa.cs" />
     <Compile Include="Models\Vagao.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
