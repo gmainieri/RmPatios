@@ -31,7 +31,7 @@ namespace RumoPatios.Models
 
         #region propriedades
         /// <summary>
-        /// Data de entrega
+        /// Os carregamentos devem ser concluidos antes do instante, as chegadas devem ser tratadas a partir do instante. 
         /// </summary>
         internal DateTime instante { get; set; }
 

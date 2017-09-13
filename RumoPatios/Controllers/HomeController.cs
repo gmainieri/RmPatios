@@ -203,7 +203,13 @@ namespace RumoPatios.Controllers
                     }
                     else if(job.chegada != null)
                     {
-                        job.concluida = 1;
+                        if (timeLine[0].instante >= job.chegada.HorarioChegada)
+                        {
+                            //TODO: tratar a chegada
+
+                            result.rows.Add(new ResultadoOtimizaDataRow(job.chegada.HorarioChegada, String.Format("Chegada {0}", job.chegada.prefixo), 0));
+                            job.concluida = 1;
+                        }
                     }
                     else if(job.partida != null)
                     {
@@ -266,7 +272,7 @@ namespace RumoPatios.Controllers
                     {
                         evento.linhaTerminal.QtdeVagoesCarregados += evento.qtdeVagoesCarregadosLiberados;
                         var mensagem = String.Format("Terminal {0}: fim do carrgamento de {1} vagões", evento.linhaTerminal.Nome, evento.qtdeVagoesCarregadosLiberados);
-                        result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, mensagem , 0));
+                        result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, mensagem , 1));
 
                         //TODO: neste momento estou com n vagoes para levar de volta da linha terminal pra linha de manobra, criar tarefa pra isso
                     }
@@ -335,6 +341,8 @@ namespace RumoPatios.Controllers
                 var instanteTerminoCarregamento = new DateTime(); //evento.instante.Year, evento.instante.Month, evento.instante.Day, evento.instante.Hour, evento.instante.Minute, 0);
 
                 double tempoCarregamento = 0.0;
+
+                //Math.Min(job.carregamento.QtdeVagoes - qtdeVagoesAtribuidasAoCarregamento, line.vagoesVaziosAtual);
 
                 if (qtdeVagoesAtribuidasAoCarregamento > job.carregamento.QtdeVagoes)
                 {
