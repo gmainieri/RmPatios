@@ -58,7 +58,7 @@ namespace RumoPatios.Controllers
 
         internal ResultadoOtimizaData Otimizador()
         {
-            var rnd = new Random(1978);
+            var rnd = new Random();
 
             var result = new ResultadoOtimizaData();
 
