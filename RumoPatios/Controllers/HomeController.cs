@@ -58,7 +58,7 @@ namespace RumoPatios.Controllers
 
         internal ResultadoOtimizaData Otimizador()
         {
-            var rnd = new Random();
+            var rnd = new Random(1978);
 
             var result = new ResultadoOtimizaData();
 
@@ -192,6 +192,8 @@ namespace RumoPatios.Controllers
 
                         TratarCarregamento(evento, eventoP, timeLine, linhasDeManobra, linhasTerminaisLivres, result);
 
+                        vagoesLmLivres.RemoveAt(0);
+
                     }
                     else if(eventoP.chegada != null)
                     {
@@ -201,9 +203,13 @@ namespace RumoPatios.Controllers
                     {
 
                     }
-
                     break; //por enquanto só vou tratar o primeiro
                 }
+
+                if (eventosPendentes.Any())
+                    eventosPendentes.RemoveAt(0);
+
+
                 #endregion
 
                 #region tratamento de eventos
@@ -317,16 +323,16 @@ namespace RumoPatios.Controllers
             return result;
         }
 
-        private void TratarCarregamento(Evento evento, Evento eventoAtual, List<Evento> timeLine, List<Linha> linhasDeManobra, List<Evento> linhasTerminaisLivres, ResultadoOtimizaData result)
+        private void TratarCarregamento(Evento evento, Evento eventoCarregamento, List<Evento> timeLine, List<Linha> linhasDeManobra, List<Evento> linhasTerminaisLivres, ResultadoOtimizaData result)
         {
-            evento.instante = evento.instante.AddMinutes(tempoMovEntreLinhas);
-
             var linhasDeManobraComVagoesVazios = linhasDeManobra.Where(x => x.vagoesVaziosAtual > 0).ToList();
 
+            int linhasUsadas = 0;
             int qtdeVagoesAtribuidasAoCarregamento = 0;
 
             foreach (var line in linhasDeManobraComVagoesVazios)
             {
+                linhasUsadas++;
                 string acao = "";
                 qtdeVagoesAtribuidasAoCarregamento += line.vagoesVaziosAtual;
 
@@ -334,40 +340,44 @@ namespace RumoPatios.Controllers
 
                 double tempoCarregamento = 0.0;
 
-                if (qtdeVagoesAtribuidasAoCarregamento > eventoAtual.carregamento.QtdeVagoes)
+                if (qtdeVagoesAtribuidasAoCarregamento > eventoCarregamento.carregamento.QtdeVagoes)
                 {
                     qtdeVagoesAtribuidasAoCarregamento -= line.vagoesVaziosAtual; //não serão usados todos os vagoes
-                    var qtdeUsadaDaUltimaLinha = eventoAtual.carregamento.QtdeVagoes - qtdeVagoesAtribuidasAoCarregamento;
+                    var qtdeUsadaDaUltimaLinha = eventoCarregamento.carregamento.QtdeVagoes - qtdeVagoesAtribuidasAoCarregamento;
 
                     acao = String.Format("Levar {0} vagoes da linha {1} para serem carregados no terminal {2} utilizando vagao LM {3}",
-                    qtdeUsadaDaUltimaLinha, line.Nome, eventoAtual.carregamento.Linha.Nome, evento.vagaoLM.Idx);
+                    qtdeUsadaDaUltimaLinha, line.Nome, eventoCarregamento.carregamento.Linha.Nome, evento.vagaoLM.Idx);
 
                     line.vagoesVaziosAtual -= qtdeUsadaDaUltimaLinha;
 
                     tempoCarregamento = (double)qtdeUsadaDaUltimaLinha / cargaDescarga;
-                    instanteTerminoCarregamento = evento.instante.AddHours(tempoCarregamento);
+                    instanteTerminoCarregamento = eventoCarregamento.instante.AddMinutes(60 * tempoCarregamento + tempoMovEntreLinhas);
                     timeLine.Add(new Evento(line, instanteTerminoCarregamento, qtdeUsadaDaUltimaLinha)); //linha terminal está inicialmente livre 
-                    result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, acao));
+                    result.rows.Add(new ResultadoOtimizaDataRow(eventoCarregamento.instante, acao));
                     break;
                 }
 
                 tempoCarregamento = (double)line.vagoesVaziosAtual / cargaDescarga;
-                instanteTerminoCarregamento = evento.instante.AddHours(tempoCarregamento);
+                instanteTerminoCarregamento = eventoCarregamento.instante.AddMinutes(60 * tempoCarregamento + tempoMovEntreLinhas);
                 timeLine.Add(new Evento(line, instanteTerminoCarregamento, line.vagoesVaziosAtual)); //linha terminal está inicialmente livre 
 
                 acao = String.Format("Levar {0} vagoes da linha {1} para serem carregados no terminal {2} utilizando vagao LM {3}",
-                    line.vagoesVaziosAtual, line.Nome, eventoAtual.carregamento.Linha.Nome, evento.vagaoLM.Idx);
+                    line.vagoesVaziosAtual, line.Nome, eventoCarregamento.carregamento.Linha.Nome, evento.vagaoLM.Idx);
 
                 line.vagoesVaziosAtual = 0;
-                result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, acao));
-                if (qtdeVagoesAtribuidasAoCarregamento == eventoAtual.carregamento.QtdeVagoes)
+                result.rows.Add(new ResultadoOtimizaDataRow(eventoCarregamento.instante, acao));
+                if (qtdeVagoesAtribuidasAoCarregamento == eventoCarregamento.carregamento.QtdeVagoes)
                     break;
             }
 
-            linhasTerminaisLivres.RemoveAll(x => x.linhaTerminal.LinhaID == eventoAtual.carregamento.LinhaID); //apesar de usar All, só deve apagar um
+            linhasTerminaisLivres.RemoveAll(x => x.linhaTerminal.LinhaID == eventoCarregamento.carregamento.LinhaID); //apesar de usar All, só deve apagar um
 
-            double tempoCarregamentoTotal = (double)eventoAtual.carregamento.QtdeVagoes/cargaDescarga;
-            timeLine.Add(new Evento(eventoAtual.carregamento.Linha, evento.instante.AddHours(tempoCarregamentoTotal), 0));
+            double tempoCarregamentoTotal = (double)eventoCarregamento.carregamento.QtdeVagoes/cargaDescarga; //os tempos de movimentacoes dos vagoes ainda não sao considerados
+            timeLine.Add(new Evento(eventoCarregamento.carregamento.Linha, evento.instante.AddHours(tempoCarregamentoTotal), 0)); //evento de liberacao da linha terminal
+
+            evento.instante = evento.instante.AddMinutes(linhasUsadas * tempoMovEntreLinhas);
+            timeLine.Add(new Evento(evento.vagaoLM, evento.instante)); //evento de liberacao da LM
+
 
         }
 

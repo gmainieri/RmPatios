@@ -29,7 +29,7 @@
             @foreach (var item in Model.rows)
             {
                 <tr>
-                    <td>@item.horario</td>
+                    <td>@item.horario.ToString("yyyy/MM/dd HH:mm")</td>
                     <td>@item.acao</td>
                 </tr>
             }
