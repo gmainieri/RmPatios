@@ -25,6 +25,13 @@ namespace RumoPatios.Models
         //    this.prioridade = rnd.NextDouble();
         //}
 
+        public Evento() { }
+
+        public Evento(DateTime horario)
+        {
+            this.instante = horario;
+        }
+
         public Evento(VagaoLM _vagao, DateTime inst)
         {
             this.vagaoLM = _vagao;
@@ -40,12 +47,12 @@ namespace RumoPatios.Models
             //this.qtdeVagoesCarregadosLiberados = vagoesVazioLiberados;
         }
 
-        public Evento(Linha manobra, Linha terminal, DateTime inst, int vagoesVazioLiberados)
+        public Evento(Linha manobra, Linha terminal, DateTime inst, int vagoesCarregadosLiberados)
         {
             this.linhaDeManobra = manobra;
             this.linhaTerminal = terminal;
             this.instante = inst;
-            this.qtdeVagoesCarregadosLiberados = vagoesVazioLiberados;
+            this.qtdeVagoesCarregadosLiberados = vagoesCarregadosLiberados;
         } 
         #endregion
 
@@ -56,7 +63,7 @@ namespace RumoPatios.Models
         //internal double prioridade { get; set; }
 
         /// <summary>
-        /// aplica-se para liberacao de linhas terminais
+        /// aplica-se para liberacao de linhas terminais (se for negativo é quantidade de vagoes vazios liberados)
         /// </summary>
         internal int qtdeVagoesCarregadosLiberados { get; set; }
 

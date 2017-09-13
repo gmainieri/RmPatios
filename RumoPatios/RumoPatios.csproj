@@ -184,6 +184,7 @@
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Carregamento.cs" />
     <Compile Include="Models\Chegada.cs" />
+    <Compile Include="Models\Descarga.cs" />
     <Compile Include="Models\Evento.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\Linha.cs" />

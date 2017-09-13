@@ -47,7 +47,7 @@ namespace RumoPatios.Models
         public int vagoesCarregadosAtual { get; set; }
 
         [NotMapped]
-        public double aleatorio { get; set; }
+        public double prioridade { get; set; }
 
         //[NotMapped]
         //public LinkedList<VagaoLM> listaDeVagoes { get; set; }

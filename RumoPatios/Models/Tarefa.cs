@@ -25,6 +25,13 @@ namespace RumoPatios.Models
             this.instante = arrival.HorarioChegada;
             this.chegada = arrival;
             this.prioridade = rnd.NextDouble();
+        }
+
+        public Tarefa(Descarga descarga, DateTime instante, Random rnd)
+        {
+            this.instante = instante;
+            this.descarga = descarga;
+            this.prioridade = rnd.NextDouble();
         } 
         #endregion
 
@@ -49,6 +56,7 @@ namespace RumoPatios.Models
         internal Chegada chegada { get; set; }
         internal Carregamento carregamento { get; set; }
         internal Partida partida { get; set; }
+        internal Descarga descarga { get; set; }
         #endregion  
         #endregion
     }
