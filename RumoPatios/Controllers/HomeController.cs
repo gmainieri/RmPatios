@@ -15,15 +15,18 @@ namespace RumoPatios.Controllers
         int maxMovParalelo = 5; //ou seja, tenho 5 LM
         int maxVagoesMov = 60; //cada LM pode manobrar no maximo 60 vagoes
 
-        ResultadoOtimizaData result = new ResultadoOtimizaData();
+        ResultadoOtimizaData result { get; set; }
+        ApplicationDbContext db { get; set; }
+        Random rnd { get; set; }
+        List<Evento> timeLine { get; set; }
 
         public ActionResult Index()
         {
             //TODO: criar o view model com todas as tabelas
 
-            var db = new ApplicationDbContext();
+            this.db = new ApplicationDbContext();
 
-            var vm = new TelaPrincipal(db);
+            var vm = new TelaPrincipal(this.db);
 
             return View("Index", vm);
         }
@@ -60,12 +63,13 @@ namespace RumoPatios.Controllers
 
         internal ResultadoOtimizaData Otimizador()
         {
-            var rnd = new Random();
-            var db = new ApplicationDbContext();
+            this.rnd = new Random();
+            this.result = new ResultadoOtimizaData();
+            this.db = new ApplicationDbContext();
 
-            var carregamentos = db.Carregamentos.ToList();
-            var chegadas = db.Chegadas.ToList();
-            var linhas = db.Linhas.ToList();
+            var carregamentos = this.db.Carregamentos.ToList();
+            var chegadas = this.db.Chegadas.ToList();
+            var linhas = this.db.Linhas.ToList();
 
             var linhasTerminais = linhas.Where(x => String.IsNullOrEmpty(x.NomeTerminal) == false).ToList();
             var linhasDeManobra = linhas.Where(x => String.IsNullOrEmpty(x.NomeTerminal) == true).ToList();
@@ -90,7 +94,7 @@ namespace RumoPatios.Controllers
             #endregion
 
             var instantePrimeiraTarefa = listaDeTarefas.Min(x => x.instante);
-            var timeLine = new List<Evento>();
+            this.timeLine = new List<Evento>();
             var vagoesLM = new List<VagaoLM>(); //como vagao nao é uma classe do banco, tenho que criar
             //var vagoesLmLivres = new List<Evento>();
             //var linhasCarregamentoLivres = new List<Evento>();
@@ -101,7 +105,7 @@ namespace RumoPatios.Controllers
                 var novoVagaoLM = new VagaoLM(i);
                 vagoesLM.Add(novoVagaoLM);
                 //vagoesLmLivres.Add(new Evento(novoVagao, instantePrimeiroEvento));
-                timeLine.Add(new Evento(novoVagaoLM, instantePrimeiraTarefa)); //LM está inicialmente livre
+                this.timeLine.Add(new Evento(novoVagaoLM, instantePrimeiraTarefa)); //LM está inicialmente livre
             }
 
             foreach (var line in linhasTerminais)
@@ -109,7 +113,7 @@ namespace RumoPatios.Controllers
                 //line.instanteDeLiberacao = instantePrimeiroEvento; //todas as linhas de carregamento estao livres em t = 0
                 line.aleatorio = rnd.NextDouble();
                 //linhasCarregamentoLivres.Add(new Evento(line, instantePrimeiroEvento));
-                timeLine.Add(new Evento(line, instantePrimeiraTarefa)); //linha terminal está inicialmente livre 
+                this.timeLine.Add(new Evento(line, instantePrimeiraTarefa)); //linha terminal está inicialmente livre 
             }
 
             foreach(var line in linhasDeManobra)
@@ -119,7 +123,7 @@ namespace RumoPatios.Controllers
                 line.aleatorio = rnd.NextDouble();
             }
 
-            //timeLine.Sort((x, y) => x.instante.CompareTo(y.instante));
+            //this.timeLine.Sort((x, y) => x.instante.CompareTo(y.instante));
             //vagoesLM.Sort((x, y) => x.instanteDeLiberacao.CompareTo(y.instanteDeLiberacao));
             //linhasDeCarregamento.Sort((x, y) => x.instanteDeLiberacao.CompareTo(y.instanteDeLiberacao));
             
@@ -169,7 +173,7 @@ namespace RumoPatios.Controllers
             //var filaCarregamentos = new List<Carregamento>();
             //var filaChegadas = new List<Chegada>();
 
-            while (timeLine.Any())
+            while (this.timeLine.Any())
             {
                 Evento evento;
 
@@ -195,7 +199,7 @@ namespace RumoPatios.Controllers
                             continue; //não trato o eventoAtual - não deve acontecer
                         }
 
-                        this.FazCarregamento(evento, job, timeLine, linhasDeManobra);
+                        this.FazCarregamento(evento, job, linhasDeManobra);
 
                         //carregamento foi encaminhado, então linha e vagao não estão mais livres
                         linhasTerminaisLivres.RemoveAll(x => x.linhaTerminal.LinhaID == job.carregamento.LinhaID); //apesar de usar All, só deve apagar um
@@ -203,7 +207,7 @@ namespace RumoPatios.Controllers
                     }
                     else if(job.chegada != null)
                     {
-                        if (timeLine[0].instante >= job.chegada.HorarioChegada)
+                        if (this.timeLine[0].instante >= job.chegada.HorarioChegada)
                         {
                             //TODO: tratar a chegada
 
@@ -222,13 +226,13 @@ namespace RumoPatios.Controllers
                 #endregion
 
                 #region tratamento de eventos
-                timeLine = timeLine.OrderBy(x => x.instante)
+                this.timeLine = this.timeLine.OrderBy(x => x.instante)
                     //.ThenBy(x => x.prioridade)
                     //.ThenBy(x => x.chegada == null ? 9999 : x.chegada.ChegadaID)
                     //.ThenBy(x => x.carregamento == null ? 9999 : x.carregamento.CarregamentoID)
                     .ToList();
 
-                evento = timeLine[0];
+                evento = this.timeLine[0];
 
                 #region libera vagao LM
                 if (evento.vagaoLM != null)
@@ -316,7 +320,7 @@ namespace RumoPatios.Controllers
                 //#endregion 
                 #endregion
 
-                timeLine.RemoveAt(0); //removo o evento que foi tratado
+                this.timeLine.RemoveAt(0); //removo o evento que foi tratado
                 continue;
             } 
             #endregion
@@ -325,7 +329,7 @@ namespace RumoPatios.Controllers
             return result;
         }
 
-        private void FazCarregamento(Evento evento, Tarefa job, List<Evento> timeLine, List<Linha> linhasDeManobra)
+        private void FazCarregamento(Evento evento, Tarefa job, List<Linha> linhasDeManobra)
         {
             var linhasDeManobraComVagoesVazios = linhasDeManobra.Where(x => x.vagoesVaziosAtual > 0).ToList();
 
@@ -336,12 +340,14 @@ namespace RumoPatios.Controllers
             {
                 linhasUsadas++;
                 string acao = "";
-                var qtdeDaLinha = Math.Min(job.carregamento.QtdeVagoes - qtdeVagoesAtribuidasAcumulada, line.vagoesVaziosAtual);
+
+                var qtdeRestante = job.carregamento.QtdeVagoes - qtdeVagoesAtribuidasAcumulada;
+                var qtdeDaLinha = Math.Min(qtdeRestante, line.vagoesVaziosAtual); //minimo entre quanto falta e quanto tem disponivel na linha
                 qtdeVagoesAtribuidasAcumulada += qtdeDaLinha;
 
                 var tempoCarregamento = (double)qtdeDaLinha / cargaDescarga;
                 var instanteTerminoCarregamento = evento.instante.AddMinutes(60 * tempoCarregamento + tempoMovEntreLinhas);
-                timeLine.Add(new Evento(line, job.carregamento.Linha, instanteTerminoCarregamento, qtdeDaLinha)); //termino do carregamento dos n vagoes
+                this.timeLine.Add(new Evento(line, job.carregamento.Linha, instanteTerminoCarregamento, qtdeDaLinha)); //termino do carregamento dos n vagoes
 
                 acao = String.Format("Levar {0} vagoes da linha {1} para serem carregados no terminal {2} utilizando vagão LM #{3}",
                     qtdeDaLinha, line.Nome, job.carregamento.Linha.Nome, evento.vagaoLM.Idx);
@@ -352,16 +358,13 @@ namespace RumoPatios.Controllers
                     break;
             }
 
-            
-
             double tempoCarregamentoTotal = (double)job.carregamento.QtdeVagoes/cargaDescarga; //os tempos de movimentacoes dos vagoes ainda não sao considerados
-            timeLine.Add(new Evento(job.carregamento.Linha, evento.instante.AddHours(tempoCarregamentoTotal))); //evento de liberacao da linha terminal
+            this.timeLine.Add(new Evento(job.carregamento.Linha, evento.instante.AddHours(tempoCarregamentoTotal))); //evento de liberacao da linha terminal
 
             evento.instante = evento.instante.AddMinutes(linhasUsadas * tempoMovEntreLinhas);
-            timeLine.Add(new Evento(evento.vagaoLM, evento.instante)); //evento de liberacao da LM
+            this.timeLine.Add(new Evento(evento.vagaoLM, evento.instante)); //evento de liberacao da LM
 
             job.concluida = 1;
-
         }
 
     }
