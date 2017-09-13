@@ -37,8 +37,8 @@ namespace RumoPatios.Models
 
         public virtual ICollection<Carregamento> Carregamentos { get; set; }
 
-        [NotMapped]
-        public DateTime instanteDeLiberacao { get; set; }
+        //[NotMapped]
+        //public DateTime instanteDeLiberacao { get; set; }
 
         [NotMapped]
         public int vagoesVaziosAtual { get; set; }

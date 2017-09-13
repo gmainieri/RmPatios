@@ -11,41 +11,55 @@ namespace RumoPatios.Models
     public class Evento
     {
         #region construtores
-        public Evento(Carregamento _carregamento)
+        public Evento(Carregamento _carregamento, Random rnd)
         {
             this.carregamento = _carregamento;
             this.instante = carregamento.HorarioCarregamento;
+            this.prioridade = rnd.NextDouble();
             //this.tipo = 4;
         }
 
-        public Evento(Chegada _chegada)
+        public Evento(Chegada _chegada, Random rnd)
         {
             this.chegada = _chegada;
             this.instante = _chegada.HorarioChegada;
+            this.prioridade = rnd.NextDouble();
         }
 
         public Evento(VagaoLM _vagao, DateTime inst)
         {
-            this.vagao = _vagao;
+            this.vagaoLM = _vagao;
             this.instante = inst;
+            this.prioridade = -1.0; //recursos tem prioridade frente a eventos
         }
 
-        public Evento(Linha _linha, DateTime inst)
+        public Evento(Linha _linha, DateTime inst, int vagoesVazioLiberados)
         {
-            this.linha = _linha;
+            this.linhaTerminal = _linha;
             this.instante = inst;
+            this.prioridade = -1.0;  //recursos tem prioridade frente a eventos
+            this.qtdeVagoescCarregadosLiberados = vagoesVazioLiberados;
         } 
         #endregion
 
         #region propriedades
         internal DateTime instante { get; set; }
 
-        #region se for uma liberação, o evento está associado a um recurso (vagao ou linha)
-        internal VagaoLM vagao { get; set; }
-        internal Linha linha { get; set; }
+        /// <summary>
+        /// prioridade do evento (-1 para recursos (vagao ou linha), [0,1] para eventos do banco)
+        /// </summary>
+        internal double prioridade { get; set; }
+
+        /// <summary>
+        /// aplica-se para liberacao de linhas terminais
+        /// </summary>
+        internal int qtdeVagoescCarregadosLiberados { get; set; }
+
+        #region se for uma liberação, o evento está associado a um recurso (vagao LM ou linha terminal)
+        internal VagaoLM vagaoLM { get; set; }
+        internal Linha linhaTerminal { get; set; }
         #endregion
-
-
+        
         #region caso contrario esta ligado a algum dos eventos do banco
         internal Chegada chegada { get; set; }
         internal Carregamento carregamento { get; set; }

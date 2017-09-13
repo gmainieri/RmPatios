@@ -13,11 +13,11 @@ namespace RumoPatios.ViewModels
         {
             this.rows = new List<ResultadoOtimizaDataRow>();
 
-            for(int i = 0; i < 20; i++)
-            {
-                this.rows.Add(new ResultadoOtimizaDataRow(i));
-                System.Threading.Thread.Sleep(50);
-            }
+            //for(int i = 0; i < 5; i++)
+            //{
+            //    this.rows.Add(new ResultadoOtimizaDataRow(i));
+            //    System.Threading.Thread.Sleep(50);
+            //}
         }
     }
 
@@ -28,14 +28,20 @@ namespace RumoPatios.ViewModels
 
         public ResultadoOtimizaDataRow()
         {
-            this.horario = DateTime.Now;
-            this.acao = "";
+            //this.horario = DateTime.Now;
+            //this.acao = "";
         }
 
-        public ResultadoOtimizaDataRow(int delay)
+        //public ResultadoOtimizaDataRow(int delay)
+        //{
+        //    this.horario = DateTime.Now.AddHours(Convert.ToDouble(delay));
+        //    this.acao = "";
+        //}
+
+        public ResultadoOtimizaDataRow(DateTime instante, string Acao)
         {
-            this.horario = DateTime.Now.AddHours(Convert.ToDouble(delay));
-            this.acao = "";
+            this.horario = instante;
+            this.acao = Acao;
         }
     }
 }
