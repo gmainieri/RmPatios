@@ -32,7 +32,14 @@ namespace RumoPatios.Models
             this.instante = instante;
             this.descarga = descarga;
             this.prioridade = rnd.NextDouble();
-        } 
+        }
+
+        public Tarefa(Movimento mov, DateTime inst, Random rnd)
+        {
+            this.instante = inst;
+            this.movimento = mov;
+            this.prioridade = rnd.NextDouble();
+        }
         #endregion
 
 
@@ -45,18 +52,19 @@ namespace RumoPatios.Models
         /// <summary>
         /// prioridade da tarefa
         /// </summary>
-        internal double prioridade { get; set; }
+        public double prioridade { get; set; }
 
         /// <summary>
         /// 1 se foi, 0 caso contrario
         /// </summary>
-        internal int concluida { get; set; }
+        public int concluida { get; set; }
 
         #region tarefa esta associada a alguma das tarefas do banco
-        internal Chegada chegada { get; set; }
-        internal Carregamento carregamento { get; set; }
-        internal Partida partida { get; set; }
-        internal Descarga descarga { get; set; }
+        public Chegada chegada { get; set; }
+        public Carregamento carregamento { get; set; }
+        public Partida partida { get; set; }
+        public Descarga descarga { get; set; }
+        public Movimento movimento { get; set; }
         #endregion  
         #endregion
     }

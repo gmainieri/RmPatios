@@ -54,13 +54,13 @@ namespace RumoPatios.Models
             //this.qtdeVagoesLiberados = vagoesVazioLiberados;
         }
 
-        public Evento(Linha manobra, Linha terminal, DateTime inst, int vagoesCarregadosLiberados)
-        {
-            this.linhaDeManobra = manobra;
-            this.linhaTerminal = terminal;
-            this.instante = inst;
-            this.qtdeVagoesLiberados = vagoesCarregadosLiberados;
-        } 
+        //public Evento(Linha manobra, Linha terminal, DateTime inst, int vagoesCarregadosLiberados)
+        //{
+        //    this.linhaDeManobra = manobra;
+        //    this.linhaTerminal = terminal;
+        //    this.instante = inst;
+        //    this.qtdeVagoesLiberados = vagoesCarregadosLiberados;
+        //} 
         #endregion
 
         #region propriedades
@@ -72,7 +72,7 @@ namespace RumoPatios.Models
         /// <summary>
         /// aplica-se para liberacao de linhas terminais (positivo: qtde vagoes carregados, negativo: quantidade de vagoes vazios)
         /// </summary>
-        internal int qtdeVagoesLiberados { get; set; }
+        //internal int qtdeVagoesLiberados { get; set; }
 
         #region se for uma liberação, o evento está associado a um recurso (vagao LM ou linha terminal)
         /// <summary>
@@ -91,7 +91,7 @@ namespace RumoPatios.Models
         /// <summary>
         /// se esta propriedade não for nula, então (qtdeVagoesLiberados != 0). Significado: carga/descarga foi concluida de N vagoes na linha terminal que devem ser realocados a linha de manobra da onde eles vieram.
         /// </summary>
-        internal Linha linhaDeManobra { get; set; }
+        //internal Linha linhaDeManobra { get; set; }
         #endregion
         
         //#region caso contrario esta ligado a algum dos eventos do banco

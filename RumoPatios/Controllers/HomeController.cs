@@ -34,6 +34,7 @@ namespace RumoPatios.Controllers
         ApplicationDbContext db { get; set; }
         Random rand { get; set; }
         List<Evento> timeLine { get; set; }
+        List<Tarefa> listaDeTarefas { get; set; }
 
         public ActionResult Index()
         {
@@ -62,6 +63,8 @@ namespace RumoPatios.Controllers
 
         public ActionResult ExecutaCompleto()
         {
+            //this.Otimizador();
+
             try
             {
                 var vm = this.Otimizador();
@@ -82,9 +85,10 @@ namespace RumoPatios.Controllers
             this.result = new ResultadoOtimizaData();
             this.db = new ApplicationDbContext();
             this.timeLine = new List<Evento>();
+            this.listaDeTarefas = new List<Tarefa>();
 
             ////TODO: implementar lista generica como abaixo
-            //c# order by using reflection
+            ////c# order by using reflection
             //var timeLineTest = new List<object>();
             //timeLineTest.Add(new Evento(this.rand));
             //timeLineTest.Add(new Evento(this.rand));
@@ -99,8 +103,6 @@ namespace RumoPatios.Controllers
             var linhasDeManobra = linhas.Where(x => String.IsNullOrEmpty(x.NomeTerminal) == true).ToList();
 
             #region contruir lista de tarefas
-            var listaDeTarefas = new List<Tarefa>();
-
             foreach (var load in carregamentos)
             {
                 listaDeTarefas.Add(new Tarefa(load, rand));
@@ -259,39 +261,27 @@ namespace RumoPatios.Controllers
                 #region libera linha terminal
                 else if (evento.linhaTerminal != null)
                 {
-                    if(evento.qtdeVagoesLiberados > 0)
-                    {
-                        evento.linhaTerminal.QtdeVagoesCarregados += evento.qtdeVagoesLiberados;
-                        var mensagem = String.Format("Terminal {0}: fim de carga ({1} vagões)", evento.linhaTerminal.Nome, evento.qtdeVagoesLiberados);
-                        result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, mensagem , 1));
-
-                        //TODO: neste momento estou com n vagoes carregados para levar de volta da linha terminal pra linha de manobra, criar tarefa pra isso
-                    }
-                    else if(evento.qtdeVagoesLiberados < 0)
-                    {
-                        evento.linhaTerminal.QtdeVagoesVazios += -1 * evento.qtdeVagoesLiberados;
-                        var mensagem = String.Format("Terminal {0}: fim de descarga ({1} vagões)", evento.linhaTerminal.Nome, -1 * evento.qtdeVagoesLiberados);
-                        result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, mensagem, 1));
-
-                        //TODO: neste momento estou com n vagoes vazios para levar de volta da linha terminal pra linha de manobra, criar tarefa pra isso
-
-                    }
-                    else
-                    {
-                        result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, String.Format("Terminal {0} disponível", evento.linhaTerminal.Nome), 0));
-                        linhasTerminaisLivres.Add(evento);
-                    }
-
-                    //if (eventosPendentes.Any(x => x.carregamento != null) && vagoesLmLivres.Any())
+                    //if(evento.qtdeVagoesLiberados > 0)
                     //{
-                    //    #region ocupar linha com carregamento
-
-                    //    #endregion
+                    //    //evento.linhaTerminal.QtdeVagoesCarregados += evento.qtdeVagoesLiberados;
+                    //    var mensagem = String.Format("Terminal {0}: fim de carga ({1} vagões)", evento.linhaTerminal.Nome, evento.qtdeVagoesLiberados);
+                    //    result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, mensagem , 1));
+                    //}
+                    //else if(evento.qtdeVagoesLiberados < 0)
+                    //{
+                    //    //evento.linhaTerminal.QtdeVagoesVazios += -1 * evento.qtdeVagoesLiberados;
+                    //    var mensagem = String.Format("Terminal {0}: fim de descarga ({1} vagões)", evento.linhaTerminal.Nome, -1 * evento.qtdeVagoesLiberados);
+                    //    result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, mensagem, 1));
                     //}
                     //else
                     //{
+                    //    result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, String.Format("Terminal {0} disponível", evento.linhaTerminal.Nome), 0));
                     //    linhasTerminaisLivres.Add(evento);
                     //}
+
+                    result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, String.Format("Terminal {0} disponível", evento.linhaTerminal.Nome), 0));
+                    linhasTerminaisLivres.Add(evento);
+                    
                 }
                 #endregion
                 //else if (evento.carregamento != null)
@@ -312,8 +302,12 @@ namespace RumoPatios.Controllers
 
                 if(timeLine.Any() == false || timeLine[0].instante > ultimoInstanteTratado)
                 {
+                    listaDeTarefas = listaDeTarefas.OrderBy(x => x.instante)
+                        .ThenBy(x => x.prioridade)
+                        .ToList();
+
                     #region resolver as tarefas da fila
-                    foreach (var job in listaDeTarefas)
+                    foreach (var job in listaDeTarefas.ToList())
                     {
                         if (job.carregamento != null)
                         {
@@ -325,7 +319,7 @@ namespace RumoPatios.Controllers
                             if (vagoesLmLivres.Any() == false)
                                 continue;
 
-                            var vagaoLivre = vagoesLmLivres[0];
+                            var vagaoDesignado = vagoesLmLivres[0];
 
                             var qtdeAtualVagoesVaziosNoPatio = linhasDeManobra.Sum(x => x.vagoesVaziosAtual);
 
@@ -334,7 +328,7 @@ namespace RumoPatios.Controllers
                                 continue; //não trato o eventoAtual - não deve acontecer
                             }
 
-                            this.FazCarregamento(vagaoLivre, job, linhasDeManobra);
+                            this.FazCarregamento(vagaoDesignado, job, linhasDeManobra);
 
                             //carregamento foi encaminhado, então linha e vagao não estão mais livres
                             linhasTerminaisLivres.RemoveAll(x => x.linhaTerminal.LinhaID == job.carregamento.LinhaID); //apesar de usar All, só deve apagar um
@@ -342,7 +336,7 @@ namespace RumoPatios.Controllers
                         }
                         else if (job.descarga != null)
                         {
-                            if (linhasTerminaisLivres.Any(x => x.linhaTerminal.Capacidade >= job.descarga.linhaOrigem.QtdeVagoesCarregados) == false)
+                            if (linhasTerminaisLivres.Any(x => x.linhaTerminal.Capacidade >= job.descarga.linhaManobra.QtdeVagoesCarregados) == false)
                             {
                                 continue; //se o terminal está ocupado
                             }
@@ -358,6 +352,36 @@ namespace RumoPatios.Controllers
                             vagoesLmLivres.RemoveAt(0);
 
                         }
+                        else if(job.movimento != null)
+                        {
+                            if (vagoesLmLivres.Any() == false)
+                                continue;
+
+                            var vagaoDesignado = vagoesLmLivres[0];
+
+                            vagoesLmLivres.RemoveAt(0); //movimento foi encaminhado, então ocupo o vagao
+
+                            vagaoDesignado.instante = ultimoInstanteTratado.AddMinutes(this.tempoMovEntreLinhas);
+
+                            this.timeLine.Add(vagaoDesignado);
+
+                            var acao = "";
+
+                            if (job.movimento.qtdeVagoes > 0)
+                            {
+                                acao = String.Format("Levar {0} vagoes carregados do terminal {1} para a linha {2} utilizando vagão LM #{3}",
+                                    job.movimento.qtdeVagoes, job.movimento.linhaOrigem.Nome, job.movimento.linhaDestino.Nome, vagaoDesignado.vagaoLM.Idx);
+                            }
+                            else
+                            {
+                                acao = String.Format("Levar {0} vagoes vazios do terminal {1} para a linha {2} utilizando vagão LM #{3}",
+                                    -1 * job.movimento.qtdeVagoes, job.movimento.linhaOrigem.Nome, job.movimento.linhaDestino.Nome, vagaoDesignado.vagaoLM.Idx);
+                            }
+
+                            result.rows.Add(new ResultadoOtimizaDataRow(ultimoInstanteTratado, acao, 1));
+
+                            job.concluida = 1;
+                        }
                         else if (job.chegada != null)
                         {
                             if (this.timeLine[0].instante >= job.chegada.HorarioChegada)
@@ -365,7 +389,7 @@ namespace RumoPatios.Controllers
                                 //TODO: tratar a chegada
                                 //uma chegada implica em decidir em quais linhas de manobra alocar os vagoes
                                 //uma chegada implica em mais vagoes carregados que precisam ser descarregados
-                                //ja neste instante, preciso providenciar as descargas dos vagoes do patio e que acabaram de chegar
+                                //ja neste instante, preciso providenciar as descargas dos vagoes do patio e que acabaram de chegar, criar tarefas Movimento?
 
                                 result.rows.Add(new ResultadoOtimizaDataRow(job.chegada.HorarioChegada, String.Format("Chegada {0}", job.chegada.prefixo), 0));
                                 job.concluida = 1;
@@ -405,10 +429,13 @@ namespace RumoPatios.Controllers
                 qtdeVagoesAtribuidasAcumulada += qtdeDaLinha;
 
                 var tempoCarregamento = (double)qtdeDaLinha / cargaDescarga;
-                var instanteTerminoCarregamento = evento.instante.AddMinutes(60 * tempoCarregamento + tempoMovEntreLinhas);
-                this.timeLine.Add(new Evento(line, job.carregamento.Linha, instanteTerminoCarregamento, qtdeDaLinha)); //termino do carregamento dos n vagoes
+                var instanteTerminoCarregamento = evento.instante.AddMinutes(tempoMovEntreLinhas + (60 * tempoCarregamento));
+                //this.timeLine.Add(new Evento(line, job.carregamento.Linha, instanteTerminoCarregamento, qtdeDaLinha)); //termino do carregamento dos n vagoes
 
-                acao = String.Format("Levar {0} vagoes da linha {1} para serem carregados no terminal {2} utilizando vagão LM #{3}",
+                var novaTarefaMov = new Movimento(job.carregamento.Linha, line, qtdeDaLinha); //cria uma tarefa de solicitacao de movimento da linha terminal para a linha de manobra
+                listaDeTarefas.Add(new Tarefa(novaTarefaMov, instanteTerminoCarregamento, this.rand));
+
+                acao = String.Format("Levar {0} vagoes da linha {1} para carregamento no terminal {2} utilizando vagão LM #{3}",
                     qtdeDaLinha, line.Nome, job.carregamento.Linha.Nome, evento.vagaoLM.Idx);
 
                 line.vagoesVaziosAtual -= qtdeDaLinha;
@@ -427,7 +454,7 @@ namespace RumoPatios.Controllers
         }
 
 
-        private void FazDescarga(Evento evento, Tarefa job, List<Evento> linhasTerminaisLivres)
+        private void FazDescarga(Evento eventoVagao, Tarefa job, List<Evento> linhasTerminaisLivres)
         {
             //int linhasUsadas = 0;
             //int qtdeVagoesAtribuidasAcumulada = 0;
@@ -436,29 +463,35 @@ namespace RumoPatios.Controllers
             for (t = 0; t < linhasTerminaisLivres.Count; t++)
             {
                 var terminal = linhasTerminaisLivres[t];
-                if (terminal.linhaTerminal.Capacidade < job.descarga.linhaOrigem.QtdeVagoesCarregados)
-                {
+                if (terminal.linhaTerminal.Capacidade < job.descarga.linhaManobra.QtdeVagoesCarregados)
                     continue;
-                }
+            
+                var tempoDescarga = (double)job.descarga.linhaManobra.QtdeVagoesCarregados / this.cargaDescarga;
+                var instanteTerminoDescarga = eventoVagao.instante.AddMinutes(tempoMovEntreLinhas + (60 * tempoDescarga));
+                //var instanteLiberacaoDoTerminal = instanteTerminoDescarga.AddMinutes(tempoMovEntreLinhas);
+                //this.timeLine.Add(new Evento(job.descarga.linhaOrigem, terminal.linhaTerminal, instanteTerminoDescarga, -1 * job.descarga.linhaOrigem.QtdeVagoesCarregados)); //termino da descarga dos n vagoes
+                //this.timeLine.Add(new Evento(terminal.linhaTerminal, instanteLiberacaoDoTerminal)); //evento de liberacao da linha terminal
 
-                var tempoCarregamento = (double)job.descarga.linhaOrigem.QtdeVagoesCarregados / this.cargaDescarga;
-                var instanteTerminoDescarga = evento.instante.AddMinutes(60 * tempoCarregamento + tempoMovEntreLinhas);
-                var instanteLiberacaoDoTerminal = instanteTerminoDescarga.AddMinutes(tempoMovEntreLinhas);
-                this.timeLine.Add(new Evento(job.descarga.linhaOrigem, terminal.linhaTerminal, instanteTerminoDescarga, -1 * job.descarga.linhaOrigem.QtdeVagoesCarregados)); //termino da descarga dos n vagoes
-                this.timeLine.Add(new Evento(terminal.linhaTerminal, instanteLiberacaoDoTerminal)); //evento de liberacao da linha terminal
+                var novaTarefaMov = new Movimento(terminal.linhaTerminal, job.descarga.linhaManobra, - 1 * job.descarga.linhaManobra.QtdeVagoesCarregados); //cria uma tarefa de solicitacao de movimento da linha terminal para a linha de manobra
+                listaDeTarefas.Add(new Tarefa(novaTarefaMov, instanteTerminoDescarga , this.rand));
 
-                string acao = String.Format("Levar {0} vagoes da linha {1} para serem descarregados no terminal {2} utilizando vagão LM #{3}",
-                    job.descarga.linhaOrigem.QtdeVagoesCarregados, job.descarga.linhaOrigem.Nome, terminal.linhaTerminal.Nome, evento.vagaoLM.Idx);
+                string acao = String.Format(
+                    "Levar {0} vagoes da linha {1} para descarga no terminal {2} utilizando vagão LM #{3}",
+                    job.descarga.linhaManobra.QtdeVagoesCarregados, 
+                    job.descarga.linhaManobra.Nome, 
+                    terminal.linhaTerminal.Nome, 
+                    eventoVagao.vagaoLM.Idx
+                    );
 
-                this.result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, acao, 1));
+                this.result.rows.Add(new ResultadoOtimizaDataRow(eventoVagao.instante, acao, 1));
 
                 break;
             }
 
             linhasTerminaisLivres.RemoveAt(t);
 
-            evento.instante = evento.instante.AddMinutes(tempoMovEntreLinhas);
-            this.timeLine.Add(new Evento(evento.vagaoLM, evento.instante)); //evento de liberacao da LM
+            eventoVagao.instante = eventoVagao.instante.AddMinutes(tempoMovEntreLinhas);
+            this.timeLine.Add(new Evento(eventoVagao.vagaoLM, eventoVagao.instante)); //evento de liberacao da LM
 
             job.concluida = 1;
         }
