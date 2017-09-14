@@ -25,7 +25,14 @@ namespace RumoPatios.Models
         //    this.prioridade = rnd.NextDouble();
         //}
 
-        public Evento() { }
+        public Evento()
+        {
+        }
+
+        public Evento(Random rand) 
+        {
+            this.instante = DateTime.Now.AddMinutes(rand.Next(5000));
+        }
 
         public Evento(DateTime horario)
         {
@@ -44,7 +51,7 @@ namespace RumoPatios.Models
             this.linhaTerminal = _linha;
             this.instante = inst;
             //this.prioridade = -1.0;  //recursos tem prioridade frente a eventos
-            //this.qtdeVagoesCarregadosLiberados = vagoesVazioLiberados;
+            //this.qtdeVagoesLiberados = vagoesVazioLiberados;
         }
 
         public Evento(Linha manobra, Linha terminal, DateTime inst, int vagoesCarregadosLiberados)
@@ -52,20 +59,20 @@ namespace RumoPatios.Models
             this.linhaDeManobra = manobra;
             this.linhaTerminal = terminal;
             this.instante = inst;
-            this.qtdeVagoesCarregadosLiberados = vagoesCarregadosLiberados;
+            this.qtdeVagoesLiberados = vagoesCarregadosLiberados;
         } 
         #endregion
 
         #region propriedades
-        internal DateTime instante { get; set; }
+        public DateTime instante { get; set; }
 
         //// prioridade do evento (-1 para recursos (vagao ou linha), [0,1] para eventos do banco)
         //internal double prioridade { get; set; }
 
         /// <summary>
-        /// aplica-se para liberacao de linhas terminais (se for negativo é quantidade de vagoes vazios liberados)
+        /// aplica-se para liberacao de linhas terminais (positivo: qtde vagoes carregados, negativo: quantidade de vagoes vazios)
         /// </summary>
-        internal int qtdeVagoesCarregadosLiberados { get; set; }
+        internal int qtdeVagoesLiberados { get; set; }
 
         #region se for uma liberação, o evento está associado a um recurso (vagao LM ou linha terminal)
         /// <summary>
@@ -74,15 +81,15 @@ namespace RumoPatios.Models
         internal VagaoLM vagaoLM { get; set; }
         
         /// <summary>
-        /// se esta propriedade não for nula (&& qtdeVagoesCarregadosLiberados == 0), trata-se da liberacao de um terminal
+        /// se esta propriedade não for nula (&& qtdeVagoesLiberados == 0), trata-se da liberacao de um terminal
         /// </summary>
         /// <remarks>
-        /// linha terminal pode vir acompanhada de linha de manobra e qtdeVagoesCarregadosLiberados.
+        /// linha terminal pode vir acompanhada de linha de manobra e qtdeVagoesLiberados.
         /// </remarks>
         internal Linha linhaTerminal { get; set; }
         
         /// <summary>
-        /// se esta propriedade não for nula, então (qtdeVagoesCarregadosLiberados > 0). Significado: foi concluido o carregamento de N vagoes na linha terminal que devem ser realocados a linha de manobra da onde eles vieram.
+        /// se esta propriedade não for nula, então (qtdeVagoesLiberados != 0). Significado: carga/descarga foi concluida de N vagoes na linha terminal que devem ser realocados a linha de manobra da onde eles vieram.
         /// </summary>
         internal Linha linhaDeManobra { get; set; }
         #endregion
@@ -93,7 +100,8 @@ namespace RumoPatios.Models
         //internal Partida partida { get; set; }
         //#endregion 
 
-        //internal int Idx { get; set; }
+        //TODO: implementar este string só para dar uma organizada (não será usado, mas fica mais facil de entender o codigo)
+        //internal string Nome { get; set; }
 
         /// <summary>
         /// 1 - vagão LM liberado, 2 - linha de carregamento liberada, 3 - chegada de trem, 4 - carregamento, ainda não considerados: linha de partida liberada?, partida?

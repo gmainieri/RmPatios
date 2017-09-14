@@ -32,7 +32,7 @@ namespace RumoPatios.Controllers
 
         ResultadoOtimizaData result { get; set; }
         ApplicationDbContext db { get; set; }
-        Random rnd { get; set; }
+        Random rand { get; set; }
         List<Evento> timeLine { get; set; }
 
         public ActionResult Index()
@@ -78,10 +78,18 @@ namespace RumoPatios.Controllers
 
         internal ResultadoOtimizaData Otimizador()
         {
-            this.rnd = new Random();
+            this.rand = new Random();
             this.result = new ResultadoOtimizaData();
             this.db = new ApplicationDbContext();
             this.timeLine = new List<Evento>();
+
+            ////TODO: implementar lista generica como abaixo
+            //c# order by using reflection
+            //var timeLineTest = new List<object>();
+            //timeLineTest.Add(new Evento(this.rand));
+            //timeLineTest.Add(new Evento(this.rand));
+            //timeLineTest = timeLineTest.OrderBy(x => x.GetType().GetProperty("instante").GetValue(x)).ToList();
+            //timeLineTest = timeLineTest.OrderByDescending(x => x.GetType().GetProperty("instante").GetValue(x)).ToList();
 
             var carregamentos = this.db.Carregamentos.ToList();
             var chegadas = this.db.Chegadas.ToList();
@@ -95,13 +103,13 @@ namespace RumoPatios.Controllers
 
             foreach (var load in carregamentos)
             {
-                listaDeTarefas.Add(new Tarefa(load, rnd));
+                listaDeTarefas.Add(new Tarefa(load, rand));
                 timeLine.Add(new Evento(load.HorarioCarregamento)); //adiciono um evento vazio, apenas pra dar um tick no relogio
             }
 
             foreach (var arrival in chegadas)
             {
-                listaDeTarefas.Add(new Tarefa(arrival, rnd));
+                listaDeTarefas.Add(new Tarefa(arrival, rand));
                 timeLine.Add(new Evento(arrival.HorarioChegada)); //adiciono um evento vazio, apenas pra dar um tick no relogio
             }
 
@@ -126,7 +134,7 @@ namespace RumoPatios.Controllers
             foreach (var line in linhasTerminais)
             {
                 //line.instanteDeLiberacao = instantePrimeiroEvento; //todas as linhas de carregamento estao livres em t = 0
-                line.prioridade = rnd.NextDouble();
+                line.prioridade = rand.NextDouble();
                 //linhasCarregamentoLivres.Add(new Evento(line, instantePrimeiroEvento));
                 this.timeLine.Add(new Evento(line, instantePrimeiraTarefa)); //linha terminal está inicialmente livre 
             }
@@ -135,12 +143,12 @@ namespace RumoPatios.Controllers
             {
                 line.vagoesVaziosAtual = line.QtdeVagoesVazios;
                 line.vagoesCarregadosAtual = line.QtdeVagoesCarregados;
-                line.prioridade = rnd.NextDouble();
+                line.prioridade = rand.NextDouble();
 
                 if(line.QtdeVagoesCarregados > 0)
                 {
                     //cria tarefas de descarga (uma para cada linha de manobra, por enquanto)
-                    listaDeTarefas.Add(new Tarefa(new Descarga(line), instantePrimeiraTarefa, this.rnd));
+                    listaDeTarefas.Add(new Tarefa(new Descarga(line), instantePrimeiraTarefa, this.rand));
                 }
                 
             }
@@ -251,18 +259,18 @@ namespace RumoPatios.Controllers
                 #region libera linha terminal
                 else if (evento.linhaTerminal != null)
                 {
-                    if(evento.qtdeVagoesCarregadosLiberados > 0)
+                    if(evento.qtdeVagoesLiberados > 0)
                     {
-                        evento.linhaTerminal.QtdeVagoesCarregados += evento.qtdeVagoesCarregadosLiberados;
-                        var mensagem = String.Format("Terminal {0}: fim de carga ({1} vagões)", evento.linhaTerminal.Nome, evento.qtdeVagoesCarregadosLiberados);
+                        evento.linhaTerminal.QtdeVagoesCarregados += evento.qtdeVagoesLiberados;
+                        var mensagem = String.Format("Terminal {0}: fim de carga ({1} vagões)", evento.linhaTerminal.Nome, evento.qtdeVagoesLiberados);
                         result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, mensagem , 1));
 
                         //TODO: neste momento estou com n vagoes carregados para levar de volta da linha terminal pra linha de manobra, criar tarefa pra isso
                     }
-                    else if(evento.qtdeVagoesCarregadosLiberados < 0)
+                    else if(evento.qtdeVagoesLiberados < 0)
                     {
-                        evento.linhaTerminal.QtdeVagoesVazios += -1 * evento.qtdeVagoesCarregadosLiberados;
-                        var mensagem = String.Format("Terminal {0}: fim de descarga ({1} vagões)", evento.linhaTerminal.Nome, -1 * evento.qtdeVagoesCarregadosLiberados);
+                        evento.linhaTerminal.QtdeVagoesVazios += -1 * evento.qtdeVagoesLiberados;
+                        var mensagem = String.Format("Terminal {0}: fim de descarga ({1} vagões)", evento.linhaTerminal.Nome, -1 * evento.qtdeVagoesLiberados);
                         result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, mensagem, 1));
 
                         //TODO: neste momento estou com n vagoes vazios para levar de volta da linha terminal pra linha de manobra, criar tarefa pra isso
@@ -434,7 +442,7 @@ namespace RumoPatios.Controllers
                 }
 
                 var tempoCarregamento = (double)job.descarga.linhaOrigem.QtdeVagoesCarregados / this.cargaDescarga;
-                var instanteTerminoDescarga = evento.instante.AddHours(tempoCarregamento);
+                var instanteTerminoDescarga = evento.instante.AddMinutes(60 * tempoCarregamento + tempoMovEntreLinhas);
                 var instanteLiberacaoDoTerminal = instanteTerminoDescarga.AddMinutes(tempoMovEntreLinhas);
                 this.timeLine.Add(new Evento(job.descarga.linhaOrigem, terminal.linhaTerminal, instanteTerminoDescarga, -1 * job.descarga.linhaOrigem.QtdeVagoesCarregados)); //termino da descarga dos n vagoes
                 this.timeLine.Add(new Evento(terminal.linhaTerminal, instanteLiberacaoDoTerminal)); //evento de liberacao da linha terminal
