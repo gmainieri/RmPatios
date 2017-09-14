@@ -309,6 +309,7 @@ namespace RumoPatios.Controllers
                     #region resolver as tarefas da fila
                     foreach (var job in listaDeTarefas.ToList())
                     {
+                        //TODO: aqui acredito que tenha que ter uma verificacao se a tarefa esta disponivel no instante considerado (tarefas como carregamento, estão disponíveis antes do instante, mas a maioria nao) - pq o instante do carregamento é um limite, data de entrega, os demais são instantes de acontecimento mesmo
                         if (job.carregamento != null)
                         {
                             if (linhasTerminaisLivres.Any(x => x.linhaTerminal.LinhaID == job.carregamento.LinhaID) == false)
