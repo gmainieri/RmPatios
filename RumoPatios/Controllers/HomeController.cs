@@ -300,7 +300,7 @@ namespace RumoPatios.Controllers
                 this.timeLine.RemoveAt(0); //removo o evento que foi tratado
                 #endregion
 
-                if(timeLine.Any() == false || timeLine[0].instante > ultimoInstanteTratado)
+                if(this.timeLine.Any() == false || this.timeLine[0].instante > ultimoInstanteTratado)
                 {
                     listaDeTarefas = listaDeTarefas.OrderBy(x => x.instante)
                         .ThenBy(x => x.prioridade)
@@ -309,7 +309,7 @@ namespace RumoPatios.Controllers
                     #region resolver as tarefas da fila
                     foreach (var job in listaDeTarefas.ToList())
                     {
-                        //TODO: aqui acredito que tenha que ter uma verificacao se a tarefa esta disponivel no instante considerado (tarefas como carregamento, estão disponíveis antes do instante, mas a maioria nao) - pq o instante do carregamento é um limite, data de entrega, os demais são instantes de acontecimento mesmo
+                        //TODO: aqui acredito que tenha que existir uma verificacao se a tarefa esta disponivel no instante considerado (tarefas como carregamento, estão disponíveis antes do instante, mas a maioria nao) - pq o instante do carregamento é um limite, data de entrega, os demais são instantes de acontecimento mesmo
                         if (job.carregamento != null)
                         {
                             if (linhasTerminaisLivres.Any(x => x.linhaTerminal.LinhaID == job.carregamento.LinhaID) == false)
@@ -353,7 +353,7 @@ namespace RumoPatios.Controllers
                             vagoesLmLivres.RemoveAt(0);
 
                         }
-                        else if(job.movimento != null)
+                        else if (job.movimento != null && ultimoInstanteTratado >= job.instante)
                         {
                             if (vagoesLmLivres.Any() == false)
                                 continue;
@@ -383,18 +383,15 @@ namespace RumoPatios.Controllers
 
                             job.concluida = 1;
                         }
-                        else if (job.chegada != null)
+                        else if (job.chegada != null && ultimoInstanteTratado >= job.chegada.HorarioChegada)
                         {
-                            if (this.timeLine[0].instante >= job.chegada.HorarioChegada)
-                            {
-                                //TODO: tratar a chegada
-                                //uma chegada implica em decidir em quais linhas de manobra alocar os vagoes
-                                //uma chegada implica em mais vagoes carregados que precisam ser descarregados
-                                //ja neste instante, preciso providenciar as descargas dos vagoes do patio e que acabaram de chegar, criar tarefas Movimento?
+                            //TODO: tratar a chegada
+                            //uma chegada implica em decidir em quais linhas de manobra alocar os vagoes
+                            //uma chegada implica em mais vagoes carregados que precisam ser descarregados
+                            //ja neste instante, preciso providenciar as descargas dos vagoes do patio e que acabaram de chegar, criar tarefas Movimento?
 
-                                result.rows.Add(new ResultadoOtimizaDataRow(job.chegada.HorarioChegada, String.Format("Chegada {0}", job.chegada.prefixo), 0));
-                                job.concluida = 1;
-                            }
+                            result.rows.Add(new ResultadoOtimizaDataRow(job.chegada.HorarioChegada, String.Format("Chegada {0}", job.chegada.prefixo), 0));
+                            job.concluida = 1;
                         }
                         else if (job.partida != null)
                         {
