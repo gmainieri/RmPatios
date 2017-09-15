@@ -27,18 +27,18 @@ namespace RumoPatios.Models
             this.prioridade = rnd.NextDouble();
         }
 
-        public Tarefa(Descarga descarga, DateTime instante, Random rnd)
+        public Tarefa(Descarga descarregamento, DateTime inst, double priority)
         {
-            this.instante = instante;
-            this.descarga = descarga;
-            this.prioridade = rnd.NextDouble();
+            this.instante = inst;
+            this.descarga = descarregamento;
+            this.prioridade = priority; //uma descarga tem a mesma prioridade da linha de manobra que a originou
         }
 
-        public Tarefa(Movimento mov, DateTime inst, Random rnd)
+        public Tarefa(Movimento mov, DateTime inst, double priority)
         {
             this.instante = inst;
             this.movimento = mov;
-            this.prioridade = rnd.NextDouble();
+            this.prioridade = priority; //um movimento tem a prioridade da tarefa que o originou
         }
         #endregion
 

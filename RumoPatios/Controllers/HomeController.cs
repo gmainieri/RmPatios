@@ -150,7 +150,7 @@ namespace RumoPatios.Controllers
                 if(line.QtdeVagoesCarregados > 0)
                 {
                     //cria tarefas de descarga (uma para cada linha de manobra, por enquanto)
-                    listaDeTarefas.Add(new Tarefa(new Descarga(line), instantePrimeiraTarefa, this.rand));
+                    listaDeTarefas.Add(new Tarefa(new Descarga(line), instantePrimeiraTarefa, line.prioridade));
                 }
                 
             }
@@ -302,12 +302,13 @@ namespace RumoPatios.Controllers
 
                 if(this.timeLine.Any() == false || this.timeLine[0].instante > ultimoInstanteTratado)
                 {
-                    listaDeTarefas = listaDeTarefas.OrderBy(x => x.instante)
+                    var tarefasEmOrdem = listaDeTarefas.OrderBy(x => x.instante)
                         .ThenBy(x => x.prioridade)
+                        //TODO: add terceira prioridade?
                         .ToList();
 
                     #region resolver as tarefas da fila
-                    foreach (var job in listaDeTarefas.ToList())
+                    foreach (var job in tarefasEmOrdem)
                     {
                         //TODO: aqui acredito que tenha que existir uma verificacao se a tarefa esta disponivel no instante considerado (tarefas como carregamento, estão disponíveis antes do instante, mas a maioria nao) - pq o instante do carregamento é um limite, data de entrega, os demais são instantes de acontecimento mesmo
                         if (job.carregamento != null)
@@ -431,7 +432,7 @@ namespace RumoPatios.Controllers
                 //this.timeLine.Add(new Evento(line, job.carregamento.Linha, instanteTerminoCarregamento, qtdeDaLinha)); //termino do carregamento dos n vagoes
 
                 var novaTarefaMov = new Movimento(job.carregamento.Linha, line, qtdeDaLinha); //cria uma tarefa de solicitacao de movimento da linha terminal para a linha de manobra
-                listaDeTarefas.Add(new Tarefa(novaTarefaMov, instanteTerminoCarregamento, this.rand));
+                listaDeTarefas.Add(new Tarefa(novaTarefaMov, instanteTerminoCarregamento, job.prioridade));
 
                 acao = String.Format("Levar {0} vagoes da linha {1} para carregamento no terminal {2} utilizando vagão LM #{3}",
                     qtdeDaLinha, line.Nome, job.carregamento.Linha.Nome, evento.vagaoLM.Idx);
@@ -471,7 +472,7 @@ namespace RumoPatios.Controllers
                 //this.timeLine.Add(new Evento(terminal.linhaTerminal, instanteLiberacaoDoTerminal)); //evento de liberacao da linha terminal
 
                 var novaTarefaMov = new Movimento(terminal.linhaTerminal, job.descarga.linhaManobra, - 1 * job.descarga.linhaManobra.QtdeVagoesCarregados); //cria uma tarefa de solicitacao de movimento da linha terminal para a linha de manobra
-                listaDeTarefas.Add(new Tarefa(novaTarefaMov, instanteTerminoDescarga , this.rand));
+                listaDeTarefas.Add(new Tarefa(novaTarefaMov, instanteTerminoDescarga , job.prioridade));
 
                 string acao = String.Format(
                     "Levar {0} vagoes da linha {1} para descarga no terminal {2} utilizando vagão LM #{3}",
