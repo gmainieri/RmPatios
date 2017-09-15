@@ -5,6 +5,9 @@ using System.Web;
 
 namespace RumoPatios.Models
 {
+    /// <summary>
+    /// TODO: elimiar esta classe substituindo pela classe movimento
+    /// </summary>
     public class Descarga
     {
         public Descarga() { }
