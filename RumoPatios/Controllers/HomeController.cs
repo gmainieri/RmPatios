@@ -336,7 +336,7 @@ namespace RumoPatios.Controllers
                             linhasTerminaisLivres.RemoveAll(x => x.linhaTerminal.LinhaID == job.carregamento.LinhaID); //apesar de usar All, só deve apagar um
                             vagoesLmLivres.RemoveAt(0);
                         }
-                        else if (job.descarga != null)
+                        else if (job.descarga != null && ultimoInstanteTratado >= job.instante)
                         {
                             if (linhasTerminaisLivres.Any(x => x.linhaTerminal.Capacidade >= job.descarga.linhaManobra.QtdeVagoesCarregados) == false)
                             {
