@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Data;
+using System.Data.Entity;
 
 namespace RumoPatios.Controllers
 {
@@ -63,11 +65,13 @@ namespace RumoPatios.Controllers
 
         public ActionResult ExecutaCompleto()
         {
-            //this.Otimizador(); //para debugar
+            //this.Decodificador(); //para debugar
 
             try
             {
                 this.rand = new Random();
+                this.db = new ApplicationDbContext();
+                //this.db.Configuration.LazyLoadingEnabled = false;
 
                 var k = 10;
 #if !DEBUG
@@ -80,11 +84,9 @@ namespace RumoPatios.Controllers
                 {
                     var result = new ResultadoOtimizaData();
 
-                    this.db = new ApplicationDbContext();
-
-                    result.Carregamentos = this.db.Carregamentos.ToList();
-                    result.Chegadas = this.db.Chegadas.ToList();
-                    result.Linhas = this.db.Linhas.ToList();
+                    result.Carregamentos = this.db.Carregamentos.Include(x => x.Linha).AsNoTracking().ToList();
+                    result.Chegadas = this.db.Chegadas.AsNoTracking().ToList();
+                    result.Linhas = this.db.Linhas.AsNoTracking().ToList();
 
                     this.geraMutante(result);
                     vmList.Add(this.Decodificador(result));
@@ -98,7 +100,7 @@ namespace RumoPatios.Controllers
 
                 return View("_RespostaOtimiza", vmList[0]);
             }
-            catch
+            catch(Exception ex)
             {
 
             }
