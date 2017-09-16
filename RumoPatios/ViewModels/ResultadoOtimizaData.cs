@@ -16,11 +16,11 @@ namespace RumoPatios.ViewModels
 
         public List<ResultadoOtimizaDataRow> rows { get; set; }
 
-        public ResultadoOtimizaData(ApplicationDbContext db)
+        public ResultadoOtimizaData()
         {
-            this.Carregamentos = db.Carregamentos.ToList();
-            this.Chegadas = db.Chegadas.ToList();
-            this.Linhas = db.Linhas.ToList();
+            this.Carregamentos = new List<Carregamento>();
+            this.Chegadas = new List<Chegada>();
+            this.Linhas = new List<Linha>();
 
             this.rows = new List<ResultadoOtimizaDataRow>();
 

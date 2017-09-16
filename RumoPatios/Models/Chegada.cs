@@ -16,6 +16,10 @@ namespace RumoPatios.Models
         public int QtdeVagoesCarregados { get; set; }
         public int QtdeVagoesVazio { get; set; }
 
+        //assim tem o mesmo efeito de not mapped
+        //public double randLoad = 0.0;
+        //public double randUnload = 0.0;
+
         [NotMapped]
         public double randLoad { get; set; }
 

@@ -30,7 +30,7 @@ namespace RumoPatios.Controllers
         /// </summary>
         int maxVagoesMov = 60; 
 
-        ResultadoOtimizaData result { get; set; }
+        //ResultadoOtimizaData result { get; set; }
         ApplicationDbContext db { get; set; }
         Random rand { get; set; }
         List<Evento> timeLine { get; set; }
@@ -67,13 +67,32 @@ namespace RumoPatios.Controllers
 
             try
             {
-                var k = 1000;
+                this.rand = new Random();
+
+                var k = 10;
+#if !DEBUG
+                k = 1000; 
+#endif
+
                 var vmList = new List<ResultadoOtimizaData>(k);
                 
-                for (int i = 1; i < k; i++)
+                for (int i = 0; i < k; i++)
                 {
-                    vmList.Add(this.Decodificador());
+                    var result = new ResultadoOtimizaData();
+
+                    this.db = new ApplicationDbContext();
+
+                    result.Carregamentos = this.db.Carregamentos.ToList();
+                    result.Chegadas = this.db.Chegadas.ToList();
+                    result.Linhas = this.db.Linhas.ToList();
+
+                    this.geraMutante(result);
+                    vmList.Add(this.Decodificador(result));
+                    this.timeLine.Clear();
+                    this.listaDeTarefas.Clear();
                 }
+
+                var teste = String.Join(";", vmList.Select(x => x.FO).ToList());
 
                 vmList.Sort((x, y) => x.FO.CompareTo(y.FO));
 
@@ -87,11 +106,33 @@ namespace RumoPatios.Controllers
             return View();
         }
 
-        internal ResultadoOtimizaData Decodificador()
+        internal void geraMutante(ResultadoOtimizaData result)
         {
-            this.rand = new Random();
-            this.db = new ApplicationDbContext();
-            this.result = new ResultadoOtimizaData(this.db);
+            foreach(var arrival in result.Chegadas)
+            {
+                arrival.randLoad = 0.20 + 0.80 * (this.rand.NextDouble()); //blocos do carregamento, são de no mínimo 20%
+                arrival.randUnload = 0.25 + 0.75 * (this.rand.NextDouble());
+            }
+
+            foreach(var line in result.Linhas)
+            {
+                line.prioridade = this.rand.NextDouble();
+                //if (String.IsNullOrEmpty(line.NomeTerminal))
+                //{
+                //    line.vagoesCarregadosAtual = line.QtdeVagoesCarregados;
+                //    line.vagoesVaziosAtual = line.QtdeVagoesVazios;
+                //}
+                
+            }
+
+            result.Carregamentos.ForEach(x => x.prioridade = this.rand.NextDouble());
+        }
+
+        internal ResultadoOtimizaData Decodificador(ResultadoOtimizaData result)
+        {
+            //this.rand = new Random();
+            //this.db = new ApplicationDbContext();
+            //this.result = new ResultadoOtimizaData(this.db);
             this.timeLine = new List<Evento>();
             this.listaDeTarefas = new List<Tarefa>();
 
@@ -107,20 +148,20 @@ namespace RumoPatios.Controllers
             //var chegadas = this.db.Chegadas.ToList();
             //var linhas = this.db.Linhas.ToList();
 
-            var linhasTerminais = this.result.Linhas.Where(x => String.IsNullOrEmpty(x.NomeTerminal) == false).ToList();
-            var linhasDeManobra = this.result.Linhas.Where(x => String.IsNullOrEmpty(x.NomeTerminal) == true).ToList();
+            var linhasTerminais = result.Linhas.Where(x => String.IsNullOrEmpty(x.NomeTerminal) == false).ToList();
+            var linhasDeManobra = result.Linhas.Where(x => String.IsNullOrEmpty(x.NomeTerminal) == true).ToList();
 
             #region contruir lista de tarefas
-            foreach (var load in this.result.Carregamentos)
+            foreach (var load in result.Carregamentos)
             {
                 listaDeTarefas.Add(new Tarefa(load));
                 timeLine.Add(new Evento(load.HorarioCarregamento)); //adiciono um evento vazio, apenas pra dar um tick no relogio
             }
 
-            foreach (var arrival in this.result.Chegadas)
+            foreach (var arrival in result.Chegadas)
             {
-                arrival.randLoad = 0.20 + 0.80 * (this.rand.NextDouble()); //blocos do carregamento, são de no mínimo 20%
-                arrival.randUnload = 0.25 + 0.75 * (this.rand.NextDouble());
+                //arrival.randLoad = 0.20 + 0.80 * (this.rand.NextDouble()); //blocos do carregamento, são de no mínimo 20%
+                //arrival.randUnload = 0.25 + 0.75 * (this.rand.NextDouble());
 
                 int loadTotal = 0;
                 int emptyTotal = 0;
@@ -170,7 +211,7 @@ namespace RumoPatios.Controllers
             foreach (var line in linhasTerminais)
             {
                 //line.instanteDeLiberacao = instantePrimeiroEvento; //todas as linhas de carregamento estao livres em t = 0
-                line.prioridade = rand.NextDouble();
+                //line.prioridade = rand.NextDouble();
                 //linhasCarregamentoLivres.Add(new Evento(line, instantePrimeiroEvento));
                 this.timeLine.Add(new Evento(line, instantePrimeiraTarefa)); //linha terminal está inicialmente livre 
             }
@@ -179,7 +220,7 @@ namespace RumoPatios.Controllers
             {
                 line.vagoesVaziosAtual = line.QtdeVagoesVazios;
                 line.vagoesCarregadosAtual = line.QtdeVagoesCarregados;
-                line.prioridade = rand.NextDouble();
+                //line.prioridade = rand.NextDouble();
 
                 if(line.QtdeVagoesCarregados > 0)
                 {
@@ -336,7 +377,7 @@ namespace RumoPatios.Controllers
                                 continue; //não trato o eventoAtual - não deve acontecer
                             }
 
-                            this.FazCarregamento(vagaoDesignado, job, linhasDeManobra, ultimoInstanteTratado);
+                            this.FazCarregamento(vagaoDesignado, job, linhasDeManobra, ultimoInstanteTratado, result);
 
                             //carregamento foi encaminhado, então linha e vagao não estão mais livres
                             linhasTerminaisLivres.RemoveAll(x => x.linhaTerminal.LinhaID == job.carregamento.LinhaID); //apesar de usar All, só deve apagar um
@@ -354,7 +395,7 @@ namespace RumoPatios.Controllers
 
                             var vagaoLivre = vagoesLmLivres[0];
 
-                            this.FazDescarga(vagaoLivre, job, linhasTerminaisLivres, ultimoInstanteTratado);
+                            this.FazDescarga(vagaoLivre, job, linhasTerminaisLivres, ultimoInstanteTratado, result);
 
                             //carregamento foi encaminhado, então linha e vagao não estão mais livres
                             vagoesLmLivres.RemoveAt(0);
@@ -456,7 +497,7 @@ namespace RumoPatios.Controllers
             return result;
         }
 
-        private void FazCarregamento(Evento eventoVagao, Tarefa job, List<Linha> linhasDeManobra, DateTime ultimoInstante)
+        private void FazCarregamento(Evento eventoVagao, Tarefa job, List<Linha> linhasDeManobra, DateTime ultimoInstante, ResultadoOtimizaData result)
         {
             var linhasDeManobraComVagoesVazios = linhasDeManobra.Where(x => x.vagoesVaziosAtual > 0).ToList();
 
@@ -498,7 +539,7 @@ namespace RumoPatios.Controllers
         }
 
 
-        private void FazDescarga(Evento eventoVagao, Tarefa job, List<Evento> linhasTerminaisLivres, DateTime ultimoInstante)
+        private void FazDescarga(Evento eventoVagao, Tarefa job, List<Evento> linhasTerminaisLivres, DateTime ultimoInstante, ResultadoOtimizaData result)
         {
             //int linhasUsadas = 0;
             //int qtdeVagoesAtribuidasAcumulada = 0;
@@ -527,7 +568,7 @@ namespace RumoPatios.Controllers
                     eventoVagao.vagaoLM.Idx
                     );
 
-                this.result.rows.Add(new ResultadoOtimizaDataRow(ultimoInstante, acao, 1));
+                result.rows.Add(new ResultadoOtimizaDataRow(ultimoInstante, acao, 1));
 
                 break;
             }
