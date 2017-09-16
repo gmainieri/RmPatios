@@ -79,7 +79,7 @@ namespace RumoPatios.Controllers
                 int pop = 100;
                 int popElite = 20;
                 int popMutante = 20;
-                double prob = 0.60;
+                double prob = 0.55;
 
                 ResultadoOtimizaData pai1, pai2;
 
@@ -132,8 +132,8 @@ namespace RumoPatios.Controllers
 
                         var filho = new ResultadoOtimizaData(this.db);
 
-                        pai1.Chegadas.Sort((x, y) => x.ChegadaID.CompareTo(y.ChegadaID));
-                        pai2.Chegadas.Sort((x, y) => x.ChegadaID.CompareTo(y.ChegadaID));
+                        //pai1.Chegadas.Sort((x, y) => x.ChegadaID.CompareTo(y.ChegadaID));
+                        //pai2.Chegadas.Sort((x, y) => x.ChegadaID.CompareTo(y.ChegadaID));
                         foreach (var arrival in filho.Chegadas)
                         {
                             if (rand.NextDouble() > prob)
@@ -148,8 +148,8 @@ namespace RumoPatios.Controllers
                             }
                         }
 
-                        pai1.Linhas.Sort((x, y) => x.LinhaID.CompareTo(y.LinhaID));
-                        pai2.Linhas.Sort((x, y) => x.LinhaID.CompareTo(y.LinhaID));
+                        //pai1.Linhas.Sort((x, y) => x.LinhaID.CompareTo(y.LinhaID));
+                        //pai2.Linhas.Sort((x, y) => x.LinhaID.CompareTo(y.LinhaID));
                         for (int i = 0; i < filho.Linhas.Count; i++)
                         {
                             var line = filho.Linhas[i];
@@ -164,10 +164,8 @@ namespace RumoPatios.Controllers
                         }
                                 
 
-                        //linhas
-
-                        pai1.Carregamentos.Sort((x, y) => x.CarregamentoID.CompareTo(y.CarregamentoID));
-                        pai2.Carregamentos.Sort((x, y) => x.CarregamentoID.CompareTo(y.CarregamentoID));
+                        //pai1.Carregamentos.Sort((x, y) => x.CarregamentoID.CompareTo(y.CarregamentoID));
+                        //pai2.Carregamentos.Sort((x, y) => x.CarregamentoID.CompareTo(y.CarregamentoID));
                         foreach (var load in filho.Carregamentos)
                             if (rand.NextDouble() > prob)
                                 load.prioridade = pai2.Carregamentos[load.CarregamentoID - 1].prioridade;
@@ -183,9 +181,9 @@ namespace RumoPatios.Controllers
                     #region completa a populacao com mutantes
                     while (nextPop.Count < pop)
                     {
-                        var result = new ResultadoOtimizaData(this.db);
-                        this.geraMutante(result);
-                        nextPop.Add(this.Decodificador(result));
+                        var novoMut = new ResultadoOtimizaData(this.db);
+                        this.geraMutante(novoMut);
+                        nextPop.Add(this.Decodificador(novoMut));
                     } 
                     #endregion
 
