@@ -111,8 +111,33 @@ namespace RumoPatios.Controllers
 
             foreach (var arrival in chegadas)
             {
-                listaDeTarefas.Add(new Tarefa(arrival, rand));
+                arrival.aleatorio = 0.01 * this.rand.Next(25, 100);
+
+                int loadTotal = 0;
+                int emptyTotal = 0;
+                int qtdeAtual = 0;
+                int qtdeRestante = 0;
+
+                while (loadTotal < arrival.QtdeVagoesCarregados)
+                {
+                    qtdeRestante = arrival.QtdeVagoesCarregados - loadTotal;
+                    qtdeAtual = Math.Min(qtdeRestante, (int)Math.Floor(arrival.aleatorio * arrival.QtdeVagoesCarregados));
+                    loadTotal += qtdeAtual;
+
+                    listaDeTarefas.Add(new Tarefa(arrival, qtdeAtual, 0.0));
+                }
+
+                while (emptyTotal < arrival.QtdeVagoesVazio)
+                {
+                    qtdeRestante = arrival.QtdeVagoesVazio - emptyTotal;
+                    qtdeAtual = Math.Min(qtdeRestante, (int)Math.Floor(arrival.aleatorio * arrival.QtdeVagoesVazio));
+                    emptyTotal += qtdeAtual;
+
+                    listaDeTarefas.Add(new Tarefa(arrival, -1 * qtdeAtual, 1.0));
+                }
+
                 timeLine.Add(new Evento(arrival.HorarioChegada)); //adiciono um evento vazio, apenas pra dar um tick no relogio
+
             }
 
             
@@ -363,33 +388,43 @@ namespace RumoPatios.Controllers
                             //2 mais vagoes carregados que precisam ser descarregados
                             //3 contabilizar a qtde vagoes vazios
 
+                            var qtdeVagoesAbs = Math.Abs(job.QtdeVagoesConsiderada);
+
                             var linhaDeManobraDesignada = linhasDeManobra.FirstOrDefault(x => 
-                                x.QtdeVagoesCarregados + x.QtdeVagoesVazios + job.chegada.QtdeVagoesCarregados <= x.Capacidade);
+                                x.QtdeVagoesCarregados + x.QtdeVagoesVazios + qtdeVagoesAbs <= x.Capacidade);
 
-                            if(job.chegada.QtdeVagoesCarregados > 0 && linhaDeManobraDesignada != null)
+                            if (linhaDeManobraDesignada != null)
                             {
-                                result.rows.Add(new ResultadoOtimizaDataRow(ultimoInstanteTratado, String.Format("Chegada {0}. Levar {1} vagões carregados para a linha {2}", job.chegada.prefixo, job.chegada.QtdeVagoesCarregados, linhaDeManobraDesignada.Nome), 1));
+                                if (job.QtdeVagoesConsiderada > 0)
+                                {
+                                    result.rows.Add(new ResultadoOtimizaDataRow(ultimoInstanteTratado, 
+                                        String.Format("Chegada {0}. Levar {1} vagões carregados para a linha {2}", 
+                                        job.chegada.prefixo,
+                                        qtdeVagoesAbs, 
+                                        linhaDeManobraDesignada.Nome), 1));
 
-                                linhaDeManobraDesignada.QtdeVagoesCarregados += job.chegada.QtdeVagoesCarregados;
-                                job.chegada.QtdeVagoesCarregados = 0;
+                                    linhaDeManobraDesignada.QtdeVagoesCarregados += qtdeVagoesAbs;
+                                    //job.chegada.QtdeVagoesCarregados = 0;
 
-                                listaDeTarefas.Add(new Tarefa(new Descarga(linhaDeManobraDesignada), ultimoInstanteTratado, linhaDeManobraDesignada.prioridade));
-                                //timeLine.Add(new Evento(ultimoInstanteTratado));
-                            }
+                                    listaDeTarefas.Add(new Tarefa(new Descarga(linhaDeManobraDesignada), ultimoInstanteTratado, linhaDeManobraDesignada.prioridade));
+                                    //timeLine.Add(new Evento(ultimoInstanteTratado));
+                                }
 
-                            linhaDeManobraDesignada = linhasDeManobra.FirstOrDefault(x =>
-                                x.QtdeVagoesCarregados + x.QtdeVagoesVazios + job.chegada.QtdeVagoesVazio <= x.Capacidade);
+                                if (job.QtdeVagoesConsiderada < 0)
+                                {
+                                    result.rows.Add(new ResultadoOtimizaDataRow(ultimoInstanteTratado, 
+                                        String.Format("Chegada {0}. Levar {1} vagões vazios para a linha {2}", 
+                                        job.chegada.prefixo,
+                                        qtdeVagoesAbs, 
+                                        linhaDeManobraDesignada.Nome), 1));
 
-                            if (job.chegada.QtdeVagoesVazio > 0 && linhaDeManobraDesignada != null)
-                            {
-                                result.rows.Add(new ResultadoOtimizaDataRow(ultimoInstanteTratado, String.Format("Chegada {0}. Levar {1} vagões vazios para a linha {2}", job.chegada.prefixo, job.chegada.QtdeVagoesVazio, linhaDeManobraDesignada.Nome), 1));
+                                    linhaDeManobraDesignada.QtdeVagoesVazios += qtdeVagoesAbs;
+                                    //job.chegada.QtdeVagoesVazio = 0;
+                                }
 
-                                linhaDeManobraDesignada.QtdeVagoesVazios += job.chegada.QtdeVagoesVazio;
-                                job.chegada.QtdeVagoesVazio = 0;
+                                job.concluida = 1;
                             }
                             
-                            if(job.chegada.QtdeVagoesCarregados + job.chegada.QtdeVagoesVazio == 0)
-                                job.concluida = 1;
                         }
                         else if (job.partida != null)
                         {
@@ -405,6 +440,10 @@ namespace RumoPatios.Controllers
             #endregion
 
             //result.rows.Sort((x, y) => x.horario.CompareTo(y.horario));
+            
+            var FO = result.rows.Sum(x => x.qtdeManobras);
+            result.rows.Add(new ResultadoOtimizaDataRow(DateTime.Now, "Total de manobras", FO));
+
             return result;
         }
 

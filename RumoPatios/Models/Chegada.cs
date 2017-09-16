@@ -16,8 +16,8 @@ namespace RumoPatios.Models
         public int QtdeVagoesCarregados { get; set; }
         public int QtdeVagoesVazio { get; set; }
 
-        //[NotMapped]
-        //public int qtdeVagoesTotais { get; set; }
+        [NotMapped]
+        public double aleatorio { get; set; }
 
     }
 }

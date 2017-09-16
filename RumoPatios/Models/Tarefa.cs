@@ -20,11 +20,12 @@ namespace RumoPatios.Models
             this.prioridade = rnd.NextDouble();
         }
 
-        public Tarefa(Chegada arrival, Random rnd)
+        public Tarefa(Chegada arrival, int nVagoes, double priority)
         {
             this.instante = arrival.HorarioChegada;
             this.chegada = arrival;
-            this.prioridade = rnd.NextDouble();
+            this.prioridade = priority;
+            this.QtdeVagoesConsiderada = nVagoes;
         }
 
         public Tarefa(Descarga descarregamento, DateTime inst, double priority)
@@ -61,6 +62,7 @@ namespace RumoPatios.Models
 
         #region tarefa esta associada a alguma das tarefas do banco
         public Chegada chegada { get; set; }
+        public int QtdeVagoesConsiderada { get; set; }
         public Carregamento carregamento { get; set; }
         public Partida partida { get; set; }
         public Descarga descarga { get; set; }
