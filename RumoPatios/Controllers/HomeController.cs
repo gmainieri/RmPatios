@@ -312,7 +312,7 @@ namespace RumoPatios.Controllers
                 //line.instanteDeLiberacao = instantePrimeiroEvento; //todas as linhas de carregamento estao livres em t = 0
                 //line.prioridade = rand.NextDouble();
                 //linhasCarregamentoLivres.Add(new Evento(line, instantePrimeiroEvento));
-                this.timeLine.Add(new Evento(line, instantePrimeiraTarefa)); //linha terminal está inicialmente livre 
+                this.timeLine.Add(new Evento(line, instantePrimeiraTarefa)); //linha terminal está inicialmente livre //TODO: isto nem sempre é verdade, ela pode inicialmente ter vagoes vazios/carregados
             }
 
             foreach(var line in linhasDeManobra)
