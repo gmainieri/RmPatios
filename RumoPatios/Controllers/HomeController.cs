@@ -67,9 +67,17 @@ namespace RumoPatios.Controllers
 
             try
             {
-                var vm = this.Otimizador();
+                var k = 500;
+                var vmList = new List<ResultadoOtimizaData>(k);
+                
+                for (int i = 1; i < k; i++)
+                {
+                    vmList.Add(this.Otimizador());
+                }
 
-                return View("_RespostaOtimiza", vm);
+                vmList.Sort((x, y) => x.rows.Last().qtdeManobras.CompareTo(y.rows.Last().qtdeManobras));
+
+                return View("_RespostaOtimiza", vmList[0]);
             }
             catch
             {
