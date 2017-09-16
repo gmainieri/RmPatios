@@ -75,7 +75,7 @@ namespace RumoPatios.Controllers
 
                 var k = 10;
 #if !DEBUG
-                k = 1000; 
+                k = 3000; 
 #endif
 
                 var vmList = new List<ResultadoOtimizaData>(k);
