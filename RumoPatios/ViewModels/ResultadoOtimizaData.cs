@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Data;
+using System.Data.Entity;
 
 namespace RumoPatios.ViewModels
 {
@@ -16,11 +18,15 @@ namespace RumoPatios.ViewModels
 
         public List<ResultadoOtimizaDataRow> rows { get; set; }
 
-        public ResultadoOtimizaData()
+        public ResultadoOtimizaData(ApplicationDbContext db)
         {
-            this.Carregamentos = new List<Carregamento>();
-            this.Chegadas = new List<Chegada>();
-            this.Linhas = new List<Linha>();
+            //this.Carregamentos = new List<Carregamento>();
+            //this.Chegadas = new List<Chegada>();
+            //this.Linhas = new List<Linha>();
+
+            this.Carregamentos = db.Carregamentos.Include(x => x.Linha).AsNoTracking().ToList();
+            this.Chegadas = db.Chegadas.AsNoTracking().ToList();
+            this.Linhas = db.Linhas.AsNoTracking().ToList();
 
             this.rows = new List<ResultadoOtimizaDataRow>();
 

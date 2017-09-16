@@ -30,7 +30,8 @@ namespace RumoPatios.Controllers
         /// <summary>
         /// //cada LM pode manobrar no maximo 60 vagoes
         /// </summary>
-        int maxVagoesMov = 60; 
+        int maxVagoesMov = 60;
+        
 
         //ResultadoOtimizaData result { get; set; }
         ApplicationDbContext db { get; set; }
@@ -73,32 +74,130 @@ namespace RumoPatios.Controllers
                 this.db = new ApplicationDbContext();
                 //this.db.Configuration.LazyLoadingEnabled = false;
 
-                var k = 10;
+                int maxIndividous = 100;
+                int numGeracoes = 100;
+                int pop = 100;
+                int popElite = 20;
+                int popMutante = 20;
+                double prob = 0.60;
+
+                ResultadoOtimizaData pai1, pai2;
+
 #if !DEBUG
-                k = 3000; 
+                numGeracoes = 10;
 #endif
+                var populacao = new List<ResultadoOtimizaData>(maxIndividous + 10);
 
-                var vmList = new List<ResultadoOtimizaData>(k);
-                
-                for (int i = 0; i < k; i++)
+                #region gera pop inicial
+                for (int i = 0; i < maxIndividous; i++)
                 {
-                    var result = new ResultadoOtimizaData();
-
-                    result.Carregamentos = this.db.Carregamentos.Include(x => x.Linha).AsNoTracking().ToList();
-                    result.Chegadas = this.db.Chegadas.AsNoTracking().ToList();
-                    result.Linhas = this.db.Linhas.AsNoTracking().ToList();
+                    var result = new ResultadoOtimizaData(this.db);
 
                     this.geraMutante(result);
-                    vmList.Add(this.Decodificador(result));
-                    this.timeLine.Clear();
-                    this.listaDeTarefas.Clear();
+                    populacao.Add(this.Decodificador(result));
+                } 
+                #endregion
+
+                //var teste = String.Join(";", vmList.Select(x => x.FO).ToList());
+
+                populacao.Sort((x, y) => x.FO.CompareTo(y.FO));
+
+                for (int geracao = 1; geracao <= numGeracoes; geracao++)
+                {
+                    var nextPop = new List<ResultadoOtimizaData>(maxIndividous + 10);
+
+                    #region copia dos individuos de elite
+                    while (nextPop.Count < popElite)
+                    {
+                        nextPop.Add(populacao[0]); //copia o primeiro individuo da pop anterior para a prox pop
+                        populacao.RemoveAt(0); //remove o individuo que acabou de ser copiado
+                    } 
+                    #endregion
+
+                    #region faz cruzamentos
+                    while (nextPop.Count < pop - popMutante)
+                    {
+                        try
+                        {
+                            pai1 = nextPop.ElementAt(rand.Next(0, popElite)); //sorteio um elite
+                            pai2 = populacao.ElementAt(rand.Next(0, pop - popElite)); //sorteio um não-elite
+                        }
+                        catch
+                        {
+                            //caso de erro nos sorteios (nao deve acontecer)
+                            pai1 = nextPop[0];
+                            pai2 = populacao[0];
+                        }
+
+
+                        var filho = new ResultadoOtimizaData(this.db);
+
+                        pai1.Chegadas.Sort((x, y) => x.ChegadaID.CompareTo(y.ChegadaID));
+                        pai2.Chegadas.Sort((x, y) => x.ChegadaID.CompareTo(y.ChegadaID));
+                        foreach (var arrival in filho.Chegadas)
+                        {
+                            if (rand.NextDouble() > prob)
+                            {
+                                arrival.randLoad = pai2.Chegadas[arrival.ChegadaID - 1].randLoad;
+                                arrival.randUnload = pai2.Chegadas[arrival.ChegadaID - 1].randUnload;
+                            }
+                            else
+                            {
+                                arrival.randLoad = pai1.Chegadas[0].randLoad;
+                                arrival.randUnload = pai1.Chegadas[0].randUnload;
+                            }
+                        }
+
+                        pai1.Linhas.Sort((x, y) => x.LinhaID.CompareTo(y.LinhaID));
+                        pai2.Linhas.Sort((x, y) => x.LinhaID.CompareTo(y.LinhaID));
+                        for (int i = 0; i < filho.Linhas.Count; i++)
+                        {
+                            var line = filho.Linhas[i];
+                            if (rand.NextDouble() > prob)
+                            {
+                                line.prioridade = pai2.Linhas[i].prioridade;
+                            }
+                            else
+                            {
+                                line.prioridade = pai1.Linhas[i].prioridade;
+                            }
+                        }
+                                
+
+                        //linhas
+
+                        pai1.Carregamentos.Sort((x, y) => x.CarregamentoID.CompareTo(y.CarregamentoID));
+                        pai2.Carregamentos.Sort((x, y) => x.CarregamentoID.CompareTo(y.CarregamentoID));
+                        foreach (var load in filho.Carregamentos)
+                            if (rand.NextDouble() > prob)
+                                load.prioridade = pai2.Carregamentos[load.CarregamentoID - 1].prioridade;
+                            else
+                                load.prioridade = pai1.Carregamentos[load.CarregamentoID - 1].prioridade;
+
+                        nextPop.Add(this.Decodificador(filho));
+
+
+                    } 
+                    #endregion
+
+                    #region completa a populacao com mutantes
+                    while (nextPop.Count < pop)
+                    {
+                        var result = new ResultadoOtimizaData(this.db);
+                        this.geraMutante(result);
+                        nextPop.Add(this.Decodificador(result));
+                    } 
+                    #endregion
+
+                    nextPop.Sort((x, y) => x.FO.CompareTo(y.FO));
+
+                    populacao = nextPop;
+
                 }
 
-                var teste = String.Join(";", vmList.Select(x => x.FO).ToList());
 
-                vmList.Sort((x, y) => x.FO.CompareTo(y.FO));
 
-                return View("_RespostaOtimiza", vmList[0]);
+                return View("_RespostaOtimiza", populacao[0]);
             }
             catch(Exception ex)
             {
@@ -135,8 +234,8 @@ namespace RumoPatios.Controllers
             //this.rand = new Random();
             //this.db = new ApplicationDbContext();
             //this.result = new ResultadoOtimizaData(this.db);
-            this.timeLine = new List<Evento>();
-            this.listaDeTarefas = new List<Tarefa>();
+            this.timeLine = new List<Evento>(100);
+            this.listaDeTarefas = new List<Tarefa>(100);
 
             ////TODO: implementar lista generica como abaixo
             ////c# order by using reflection
