@@ -7,6 +7,7 @@ namespace RumoPatios.ViewModels
 {
     public class ResultadoOtimizaData
     {
+        public int FO { get; set; }
         public List<ResultadoOtimizaDataRow> rows { get; set; }
 
         public ResultadoOtimizaData()

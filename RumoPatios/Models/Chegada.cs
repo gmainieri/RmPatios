@@ -17,7 +17,10 @@ namespace RumoPatios.Models
         public int QtdeVagoesVazio { get; set; }
 
         [NotMapped]
-        public double aleatorio { get; set; }
+        public double randLoad { get; set; }
+
+        [NotMapped]
+        public double randUnload { get; set; }
 
     }
 }

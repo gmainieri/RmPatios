@@ -63,11 +63,11 @@ namespace RumoPatios.Controllers
 
         public ActionResult ExecutaCompleto()
         {
-            //this.Otimizador();
+            //this.Otimizador(); //para debugar
 
             try
             {
-                var k = 500;
+                var k = 1000;
                 var vmList = new List<ResultadoOtimizaData>(k);
                 
                 for (int i = 1; i < k; i++)
@@ -75,7 +75,7 @@ namespace RumoPatios.Controllers
                     vmList.Add(this.Otimizador());
                 }
 
-                vmList.Sort((x, y) => x.rows.Last().qtdeManobras.CompareTo(y.rows.Last().qtdeManobras));
+                vmList.Sort((x, y) => x.FO.CompareTo(y.FO));
 
                 return View("_RespostaOtimiza", vmList[0]);
             }
@@ -119,7 +119,8 @@ namespace RumoPatios.Controllers
 
             foreach (var arrival in chegadas)
             {
-                arrival.aleatorio = 0.01 * this.rand.Next(25, 100);
+                arrival.randLoad = 0.20 + 0.80 * (this.rand.NextDouble()); //blocos do carregamento, são de no mínimo 20%
+                arrival.randUnload = 0.25 + 0.75 * (this.rand.NextDouble());
 
                 int loadTotal = 0;
                 int emptyTotal = 0;
@@ -129,7 +130,7 @@ namespace RumoPatios.Controllers
                 while (loadTotal < arrival.QtdeVagoesCarregados)
                 {
                     qtdeRestante = arrival.QtdeVagoesCarregados - loadTotal;
-                    qtdeAtual = Math.Min(qtdeRestante, (int)Math.Floor(arrival.aleatorio * arrival.QtdeVagoesCarregados));
+                    qtdeAtual = Math.Min(qtdeRestante, (int)Math.Floor(arrival.randLoad * arrival.QtdeVagoesCarregados));
                     loadTotal += qtdeAtual;
 
                     listaDeTarefas.Add(new Tarefa(arrival, qtdeAtual, 0.0));
@@ -138,7 +139,7 @@ namespace RumoPatios.Controllers
                 while (emptyTotal < arrival.QtdeVagoesVazio)
                 {
                     qtdeRestante = arrival.QtdeVagoesVazio - emptyTotal;
-                    qtdeAtual = Math.Min(qtdeRestante, (int)Math.Floor(arrival.aleatorio * arrival.QtdeVagoesVazio));
+                    qtdeAtual = Math.Min(qtdeRestante, (int)Math.Floor(arrival.randUnload * arrival.QtdeVagoesVazio));
                     emptyTotal += qtdeAtual;
 
                     listaDeTarefas.Add(new Tarefa(arrival, -1 * qtdeAtual, 1.0));
@@ -449,8 +450,8 @@ namespace RumoPatios.Controllers
 
             //result.rows.Sort((x, y) => x.horario.CompareTo(y.horario));
             
-            var FO = result.rows.Sum(x => x.qtdeManobras);
-            result.rows.Add(new ResultadoOtimizaDataRow(DateTime.Now, "Total de manobras", FO));
+            result.FO = result.rows.Sum(x => x.qtdeManobras);
+            result.rows.Add(new ResultadoOtimizaDataRow(DateTime.Now, "Total de manobras", result.FO));
 
             return result;
         }
