@@ -22,5 +22,8 @@ namespace RumoPatios.Models
         [NotMapped]
         public double randUnload { get; set; }
 
+        //[NotMapped]
+        //public double prioridade { get; set; }
+
     }
 }

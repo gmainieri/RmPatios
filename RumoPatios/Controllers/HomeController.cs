@@ -72,7 +72,7 @@ namespace RumoPatios.Controllers
                 
                 for (int i = 1; i < k; i++)
                 {
-                    vmList.Add(this.Otimizador());
+                    vmList.Add(this.Decodificador());
                 }
 
                 vmList.Sort((x, y) => x.FO.CompareTo(y.FO));
@@ -87,11 +87,11 @@ namespace RumoPatios.Controllers
             return View();
         }
 
-        internal ResultadoOtimizaData Otimizador()
+        internal ResultadoOtimizaData Decodificador()
         {
             this.rand = new Random();
-            this.result = new ResultadoOtimizaData();
             this.db = new ApplicationDbContext();
+            this.result = new ResultadoOtimizaData(this.db);
             this.timeLine = new List<Evento>();
             this.listaDeTarefas = new List<Tarefa>();
 
@@ -103,21 +103,21 @@ namespace RumoPatios.Controllers
             //timeLineTest = timeLineTest.OrderBy(x => x.GetType().GetProperty("instante").GetValue(x)).ToList();
             //timeLineTest = timeLineTest.OrderByDescending(x => x.GetType().GetProperty("instante").GetValue(x)).ToList();
 
-            var carregamentos = this.db.Carregamentos.ToList();
-            var chegadas = this.db.Chegadas.ToList();
-            var linhas = this.db.Linhas.ToList();
+            //var carregamentos = this.db.Carregamentos.ToList();
+            //var chegadas = this.db.Chegadas.ToList();
+            //var linhas = this.db.Linhas.ToList();
 
-            var linhasTerminais = linhas.Where(x => String.IsNullOrEmpty(x.NomeTerminal) == false).ToList();
-            var linhasDeManobra = linhas.Where(x => String.IsNullOrEmpty(x.NomeTerminal) == true).ToList();
+            var linhasTerminais = this.result.Linhas.Where(x => String.IsNullOrEmpty(x.NomeTerminal) == false).ToList();
+            var linhasDeManobra = this.result.Linhas.Where(x => String.IsNullOrEmpty(x.NomeTerminal) == true).ToList();
 
             #region contruir lista de tarefas
-            foreach (var load in carregamentos)
+            foreach (var load in this.result.Carregamentos)
             {
-                listaDeTarefas.Add(new Tarefa(load, rand));
+                listaDeTarefas.Add(new Tarefa(load));
                 timeLine.Add(new Evento(load.HorarioCarregamento)); //adiciono um evento vazio, apenas pra dar um tick no relogio
             }
 
-            foreach (var arrival in chegadas)
+            foreach (var arrival in this.result.Chegadas)
             {
                 arrival.randLoad = 0.20 + 0.80 * (this.rand.NextDouble()); //blocos do carregamento, são de no mínimo 20%
                 arrival.randUnload = 0.25 + 0.75 * (this.rand.NextDouble());
@@ -184,7 +184,7 @@ namespace RumoPatios.Controllers
                 if(line.QtdeVagoesCarregados > 0)
                 {
                     //cria tarefas de descarga (uma para cada linha de manobra, por enquanto)
-                    listaDeTarefas.Add(new Tarefa(new Descarga(line), instantePrimeiraTarefa, line.prioridade));
+                    listaDeTarefas.Add(new Tarefa(new Descarga(line), instantePrimeiraTarefa));
                 }
                 
             }
@@ -415,7 +415,7 @@ namespace RumoPatios.Controllers
                                     linhaDeManobraDesignada.QtdeVagoesCarregados += qtdeVagoesAbs;
                                     //job.chegada.QtdeVagoesCarregados = 0;
 
-                                    listaDeTarefas.Add(new Tarefa(new Descarga(linhaDeManobraDesignada), ultimoInstanteTratado, linhaDeManobraDesignada.prioridade));
+                                    listaDeTarefas.Add(new Tarefa(new Descarga(linhaDeManobraDesignada), ultimoInstanteTratado));
                                     //timeLine.Add(new Evento(ultimoInstanteTratado));
                                 }
 

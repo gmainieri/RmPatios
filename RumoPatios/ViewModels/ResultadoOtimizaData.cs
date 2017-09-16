@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RumoPatios.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -8,10 +9,19 @@ namespace RumoPatios.ViewModels
     public class ResultadoOtimizaData
     {
         public int FO { get; set; }
+
+        public List<Carregamento> Carregamentos { get; set; }
+        public List<Chegada> Chegadas { get; set; }
+        public List<Linha> Linhas { get; set; }
+
         public List<ResultadoOtimizaDataRow> rows { get; set; }
 
-        public ResultadoOtimizaData()
+        public ResultadoOtimizaData(ApplicationDbContext db)
         {
+            this.Carregamentos = db.Carregamentos.ToList();
+            this.Chegadas = db.Chegadas.ToList();
+            this.Linhas = db.Linhas.ToList();
+
             this.rows = new List<ResultadoOtimizaDataRow>();
 
             //for(int i = 0; i < 5; i++)
@@ -30,6 +40,8 @@ namespace RumoPatios.ViewModels
 
         public ResultadoOtimizaDataRow()
         {
+            
+
             //this.horario = DateTime.Now;
             //this.acao = "";
         }

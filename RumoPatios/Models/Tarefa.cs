@@ -13,11 +13,11 @@ namespace RumoPatios.Models
         #region construtores
         public Tarefa() { }
 
-        public Tarefa(Carregamento load, Random rnd)
+        public Tarefa(Carregamento load)
         {
             this.instante = load.HorarioCarregamento;
             this.carregamento = load;
-            this.prioridade = rnd.NextDouble();
+            this.prioridade = load.prioridade;
         }
 
         public Tarefa(Chegada arrival, int nVagoes, double priority)
@@ -28,11 +28,11 @@ namespace RumoPatios.Models
             this.QtdeVagoesConsiderada = nVagoes;
         }
 
-        public Tarefa(Descarga descarregamento, DateTime inst, double priority)
+        public Tarefa(Descarga descarregamento, DateTime inst)
         {
             this.instante = inst;
             this.descarga = descarregamento;
-            this.prioridade = priority; //uma descarga tem a mesma prioridade da linha de manobra que a originou
+            this.prioridade = descarregamento.linhaManobra.prioridade; //uma descarga tem a mesma prioridade da linha de manobra que a originou
         }
 
         public Tarefa(Movimento mov, DateTime inst, double priority)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 
@@ -21,6 +22,9 @@ namespace RumoPatios.Models
 
         public int LinhaID { get; set; }
         public virtual Linha Linha { get; set; }
+
+        [NotMapped]
+        public double prioridade { get; set; }
 
     }
 }

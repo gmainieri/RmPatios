@@ -189,7 +189,7 @@
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\Linha.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
-    <Compile Include="Models\Manobra.cs" />
+    <Compile Include="Models\Movimento.cs" />
     <Compile Include="Models\Partida.cs" />
     <Compile Include="Models\Tarefa.cs" />
     <Compile Include="Models\Vagao.cs" />
