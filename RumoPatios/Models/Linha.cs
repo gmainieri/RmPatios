@@ -50,6 +50,10 @@ namespace RumoPatios.Models
         public double prioridade { get; set; }
 
         //[NotMapped]
-        //public LinkedList<VagaoLM> listaDeVagoes { get; set; }
+        //public LinkedList<int> listaDeVagoes { get; set; }
+        //valor negativo são vagos vazios, positivo carregados
+        //por exemplo: 10 vazios, 20 carregados, 5 vazios = [-10, 20, -5]
+        //chegando mais 10 vagoes carregados, inserir 10 no comeco da lista = [10, -10, 20, -5]
+        //chegando mais 20 vagoes carregados, apenas atualizar o primeiro elemento = [20+10, -10, 20, -5]
     }
 }

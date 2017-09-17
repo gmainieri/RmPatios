@@ -6,7 +6,7 @@ using System.Web;
 namespace RumoPatios.Models
 {
     /// <summary>
-    /// Uma tarefa é um carregamento, uma chegada ou uma partida
+    /// Uma tarefa é uma ação (são tarefas: movimentos de vagoes). As tarefas são originadas pelos eventos (carregamento, uma chegada, uma partida, etc)
     /// </summary>
     public class Tarefa
     {
@@ -28,6 +28,11 @@ namespace RumoPatios.Models
             this.QtdeVagoesConsiderada = nVagoes;
         }
 
+        /// <summary>
+        /// Tarefas de descarga são criadas a partir dos vagoes carregados que estão inicialmente no patio e assim que novos vagoes carregados chegam atraves das Chegadas
+        /// </summary>
+        /// <param name="descarregamento"></param>
+        /// <param name="inst"></param>
         public Tarefa(Descarga descarregamento, DateTime inst)
         {
             this.instante = inst;
@@ -62,7 +67,11 @@ namespace RumoPatios.Models
 
         #region tarefa esta associada a alguma das tarefas do banco
         public Chegada chegada { get; set; }
+        /// <summary>
+        /// utilizada pelas chegadas, já que elas são fracionadas em varios blocos
+        /// </summary>
         public int QtdeVagoesConsiderada { get; set; }
+        
         public Carregamento carregamento { get; set; }
         public Partida partida { get; set; }
         public Descarga descarga { get; set; }

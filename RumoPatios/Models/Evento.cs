@@ -78,7 +78,7 @@ namespace RumoPatios.Models
         /// <summary>
         /// se esta propriedade não for nula, trata-se da liberacao de um vagao LM
         /// </summary>
-        internal VagaoLM vagaoLM { get; set; }
+        public VagaoLM vagaoLM { get; set; }
         
         /// <summary>
         /// se esta propriedade não for nula (&& qtdeVagoesLiberados == 0), trata-se da liberacao de um terminal
@@ -86,7 +86,7 @@ namespace RumoPatios.Models
         /// <remarks>
         /// linha terminal pode vir acompanhada de linha de manobra e qtdeVagoesLiberados.
         /// </remarks>
-        internal Linha linhaTerminal { get; set; }
+        public Linha linhaTerminal { get; set; }
         
         /// <summary>
         /// se esta propriedade não for nula, então (qtdeVagoesLiberados != 0). Significado: carga/descarga foi concluida de N vagoes na linha terminal que devem ser realocados a linha de manobra da onde eles vieram.

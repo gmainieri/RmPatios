@@ -43,7 +43,7 @@ namespace RumoPatios.Migrations
                 );
 
             var LinhasList = new List<Linha>();
-            LinhasList.Add(new Linha { LinhaID = 1, Nome = "DPL28", NomeTerminal = "T1", Capacidade = 41, QtdeVagoesCarregados = 0, QtdeVagoesVazios = 0 });
+            LinhasList.Add(new Linha { LinhaID = 1, Nome = "DPL28", NomeTerminal = "T1", Capacidade = 41, QtdeVagoesCarregados = 20, QtdeVagoesVazios = 0 });
             LinhasList.Add(new Linha { LinhaID = 2, Nome = "PASA L6", NomeTerminal = "T2", Capacidade = 59, QtdeVagoesCarregados = 0, QtdeVagoesVazios = 0 });
             LinhasList.Add(new Linha { LinhaID = 3, Nome = "MARTINI M", NomeTerminal = "T3", Capacidade = 59, QtdeVagoesCarregados = 0, QtdeVagoesVazios = 0 });
             LinhasList.Add(new Linha { LinhaID = 4, Nome = "DPL32", NomeTerminal = "T4", Capacidade = 26, QtdeVagoesCarregados = 0, QtdeVagoesVazios = 0 });
