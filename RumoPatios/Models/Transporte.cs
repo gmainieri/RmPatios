@@ -18,22 +18,26 @@ namespace RumoPatios.Models
         /// <param name="linhaFrom">linha origem</param>
         /// <param name="linhaTo">linha destino</param>
         /// <param name="qtde">quantidade de vagoes, se carregados, positiva, negativa caso contrário</param>
-        //public Transporte(Linha linhaFrom, Linha linhaTo, int qtde, bool vazios)
-        public Transporte(Linha linhaFrom, int qtde, bool vazios)
+        public Transporte(Linha linhaFrom, Linha linhaTo, int qtde, bool vazios)
         {
+            if (linhaFrom != null && linhaTo != null)
+                return; //evita a criacao de um transporte com as duas linhas definidas (por enquanto não existe nenuma situação na qual este origem e destino são conhecidos)
+            
             this.linhaOrigem = linhaFrom;
-            //this.linhaDestino = linhaTo;
+            this.linhaDestino = linhaTo;
             this.qtdeVagoes = qtde;
             this.Vazios = vazios;
         }
 
-
+        /// <summary>
+        /// linha de origem = linha que contém os vagoes
+        /// </summary>
         public Linha linhaOrigem { get; set; }
         
         /// <summary>
-        /// TODO: remover linha de destino de uma Tarefa de movimento, já que só se deve escolher a linha de destino, no momento exato do movimento
+        /// apenas no caso dos carregamentos, quem solicita o transporte é a linha de destino
         /// </summary>
-        //public Linha linhaDestino { get; set; }
+        public Linha linhaDestino { get; set; }
 
         /// <summary>
         /// positiva: carregados, negativa: vazios
