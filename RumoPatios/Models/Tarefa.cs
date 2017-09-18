@@ -40,7 +40,7 @@ namespace RumoPatios.Models
             this.prioridade = descarregamento.linhaManobra.prioridade; //uma descarga tem a mesma prioridade da linha de manobra que a originou
         }
 
-        public Tarefa(Movimento mov, DateTime inst, double priority)
+        public Tarefa(Transporte mov, DateTime inst, double priority)
         {
             this.instante = inst;
             this.movimento = mov;
@@ -75,7 +75,7 @@ namespace RumoPatios.Models
         public Carregamento carregamento { get; set; }
         public Partida partida { get; set; }
         public Descarga descarga { get; set; }
-        public Movimento movimento { get; set; }
+        public Transporte movimento { get; set; }
         #endregion  
         #endregion
     }
