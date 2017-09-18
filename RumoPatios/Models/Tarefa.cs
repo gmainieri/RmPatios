@@ -13,11 +13,12 @@ namespace RumoPatios.Models
         #region construtores
         public Tarefa() { }
 
-        public Tarefa(Carregamento load)
+        public Tarefa(Carregamento load, int qtdeVagoes)
         {
             this.instante = load.HorarioCarregamento;
             this.carregamento = load;
             this.prioridade = load.prioridade;
+            this.QtdeVagoesConsiderada = qtdeVagoes;
         }
 
         public Tarefa(Chegada arrival, int nVagoes, double priority)
@@ -33,17 +34,17 @@ namespace RumoPatios.Models
         /// </summary>
         /// <param name="descarregamento"></param>
         /// <param name="inst"></param>
-        public Tarefa(Descarga descarregamento, DateTime inst)
-        {
-            this.instante = inst;
-            this.descarga = descarregamento;
-            this.prioridade = descarregamento.linhaManobra.prioridade; //uma descarga tem a mesma prioridade da linha de manobra que a originou
-        }
+        //public Tarefa(Descarga descarregamento, DateTime inst)
+        //{
+        //    this.instante = inst;
+        //    this.descarga = descarregamento;
+        //    this.prioridade = descarregamento.linhaManobra.prioridade; //uma descarga tem a mesma prioridade da linha de manobra que a originou
+        //}
 
-        public Tarefa(Transporte mov, DateTime inst, double priority)
+        public Tarefa(Transporte transp, DateTime inst, double priority)
         {
             this.instante = inst;
-            this.transporte = mov;
+            this.transporte = transp;
             this.prioridade = priority; //uma tarefa tem a prioridade da linha que o originou
         }
         #endregion
@@ -74,7 +75,7 @@ namespace RumoPatios.Models
         
         public Carregamento carregamento { get; set; }
         public Partida partida { get; set; }
-        public Descarga descarga { get; set; }
+        //public Descarga descarga { get; set; }
         public Transporte transporte { get; set; }
         #endregion  
         #endregion
