@@ -43,8 +43,8 @@ namespace RumoPatios.Models
         public Tarefa(Transporte mov, DateTime inst, double priority)
         {
             this.instante = inst;
-            this.movimento = mov;
-            this.prioridade = priority; //um movimento tem a prioridade da tarefa que o originou
+            this.transporte = mov;
+            this.prioridade = priority; //uma tarefa tem a prioridade da linha que o originou
         }
         #endregion
 
@@ -75,7 +75,7 @@ namespace RumoPatios.Models
         public Carregamento carregamento { get; set; }
         public Partida partida { get; set; }
         public Descarga descarga { get; set; }
-        public Transporte movimento { get; set; }
+        public Transporte transporte { get; set; }
         #endregion  
         #endregion
     }

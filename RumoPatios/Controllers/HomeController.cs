@@ -517,7 +517,7 @@ namespace RumoPatios.Controllers
                             vagoesLmLivres.RemoveAt(0);
 
                         }
-                        else if (job.movimento != null && ultimoInstanteTratado >= job.instante)
+                        else if (job.transporte != null && ultimoInstanteTratado >= job.instante)
                         {
                             if (vagoesLmLivres.Any() == false)
                                 continue;
@@ -530,35 +530,35 @@ namespace RumoPatios.Controllers
 
                             this.timeLine.Add(vagaoDesignado);
 
-                            var linhaDestino = linhasDeManobra.FirstOrDefault(x => x.vagoesVaziosAtual + x.vagoesCarregadosAtual + job.movimento.qtdeVagoes <= x.Capacidade);
+                            var linhaDestino = linhasDeManobra.FirstOrDefault(x => x.vagoesVaziosAtual + x.vagoesCarregadosAtual + job.transporte.qtdeVagoes <= x.Capacidade);
 
                             if (linhaDestino == null)
                                 continue;
 
                             var acao = "";
 
-                            if (job.movimento.Vazios == false)
+                            if (job.transporte.Vazios == false)
                             {
-                                job.movimento.linhaOrigem.vagoesCarregadosAtual -= job.movimento.qtdeVagoes;
+                                job.transporte.linhaOrigem.vagoesCarregadosAtual -= job.transporte.qtdeVagoes;
                                 acao = String.Format("Levar {0} vagões carregados do terminal {1} para a linha {2} utilizando vagão LM #{3}",
-                                    job.movimento.qtdeVagoes, 
-                                    job.movimento.linhaOrigem.Nome, 
+                                    job.transporte.qtdeVagoes, 
+                                    job.transporte.linhaOrigem.Nome, 
                                     linhaDestino.Nome, 
                                     vagaoDesignado.vagaoLM.Idx);
                             }
                             else
                             {
-                                job.movimento.linhaOrigem.vagoesVaziosAtual -= job.movimento.qtdeVagoes;
+                                job.transporte.linhaOrigem.vagoesVaziosAtual -= job.transporte.qtdeVagoes;
                                 acao = String.Format("Levar {0} vagões vazios do terminal {1} para a linha {2} utilizando vagão LM #{3}",
-                                    job.movimento.qtdeVagoes, 
-                                    job.movimento.linhaOrigem.Nome, 
+                                    job.transporte.qtdeVagoes, 
+                                    job.transporte.linhaOrigem.Nome, 
                                     linhaDestino.Nome, 
                                     vagaoDesignado.vagaoLM.Idx);
                             }
 
-                            if(job.movimento.linhaOrigem.vagoesCarregadosAtual + job.movimento.linhaOrigem.vagoesVaziosAtual == 0)
+                            if(job.transporte.linhaOrigem.vagoesCarregadosAtual + job.transporte.linhaOrigem.vagoesVaziosAtual == 0)
                             {
-                                this.timeLine.Add(new Evento(job.movimento.linhaOrigem, vagaoDesignado.instante)); //linha está realmente livre assim que o vagao encerrar a movimentacao
+                                this.timeLine.Add(new Evento(job.transporte.linhaOrigem, vagaoDesignado.instante)); //linha está realmente livre assim que o vagao encerrar a movimentacao
                             }
 
                             result.rows.Add(new ResultadoOtimizaDataRow(ultimoInstanteTratado, acao, 1));
