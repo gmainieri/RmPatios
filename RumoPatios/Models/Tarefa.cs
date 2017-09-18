@@ -69,7 +69,7 @@ namespace RumoPatios.Models
         #region tarefa esta associada a alguma das tarefas do banco
         public Chegada chegada { get; set; }
         /// <summary>
-        /// utilizada pelas chegadas, já que elas são fracionadas em varios blocos
+        /// utilizada pelas chegadas e carregamentos, já que elas são fracionadas em varios blocos
         /// </summary>
         public int QtdeVagoesConsiderada { get; set; }
         

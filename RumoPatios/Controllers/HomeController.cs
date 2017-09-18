@@ -31,7 +31,8 @@ namespace RumoPatios.Controllers
         /// //cada LM pode manobrar no maximo 60 vagoes
         /// </summary>
         int maxVagoesMov = 60;
-        
+
+        DateTime instanteInicial = new DateTime(2017, 08, 16, 4, 0, 0);
 
         //ResultadoOtimizaData result { get; set; }
         ApplicationDbContext db { get; set; }
@@ -80,6 +81,8 @@ namespace RumoPatios.Controllers
                 int popElite = 20;
                 int popMutante = 20;
                 double prob = 0.55;
+
+                //var parametros = new Parametros(this.db);
 
                 ResultadoOtimizaData pai1, pai2;
 
