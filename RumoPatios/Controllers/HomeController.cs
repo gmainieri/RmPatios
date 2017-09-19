@@ -243,6 +243,8 @@ namespace RumoPatios.Controllers
             //timeLineTest.Add(new Evento(this.rand));
             //timeLineTest = timeLineTest.OrderBy(x => x.GetType().GetProperty("instante").GetValue(x)).ToList();
             //timeLineTest = timeLineTest.OrderByDescending(x => x.GetType().GetProperty("instante").GetValue(x)).ToList();
+            //var EventoDummy = new Evento();
+            //timeLineTest = timeLineTest.Where(x => x.GetType().Equals(EventoDummy)).ToList();
 
             //var carregamentos = this.db.Carregamentos.ToList();
             //var chegadas = this.db.Chegadas.ToList();
