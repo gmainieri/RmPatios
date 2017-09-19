@@ -6,7 +6,7 @@ using System.Web;
 namespace RumoPatios.Models
 {
     /// <summary>
-    /// Tarefa de transporte de vagoes entre linhas (terminal->manobra ou manobra->terminal)
+    /// Solicitação de transporte de vagoes entre linhas (terminal=>manobra ou manobra=>terminal)
     /// </summary>
     public class Transporte
     {
