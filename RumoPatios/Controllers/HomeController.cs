@@ -418,264 +418,276 @@ namespace RumoPatios.Controllers
             var vagoesLmLivres = new List<Evento>(); //TODO: trocar por lista da classe vagao LM (isso quando lista de tarefas e timeline já forem listas de objetos)
             var linhasTerminaisLivres = new List<Evento>(); //TODO: trocar por lista da classe linha (isso quando lista de tarefas e timeline já forem listas de objetos)
 
-            //var filaCarregamentos = new List<Carregamento>();
-            //var filaChegadas = new List<Chegada>();
-
             while (this.timeLine.Any())
             {
-                this.timeLine = this.timeLine.OrderBy(x => x.instante)
-                    //.ThenBy(x => x.prioridade)
-                    .ThenBy(x => x.vagaoLM == null ? 9999 : x.vagaoLM.Idx)
-                    .ThenBy(x => x.linhaTerminal == null ? 9999 : x.linhaTerminal.LinhaID)
+                //this.timeLine = this.timeLine.OrderBy(x => x.instante)
+                //    //.ThenBy(x => x.prioridade)
+                //    .ThenBy(x => x.vagaoLM == null ? 9999 : x.vagaoLM.Idx)
+                //    .ThenBy(x => x.linhaTerminal == null ? 9999 : x.linhaTerminal.LinhaID)
+                //    .ToList();
+
+                this.timeLine.Sort((x, y) => x.instante.CompareTo(y.instante));
+
+                var timeLineAgrupada = this.timeLine.GroupBy(x => x.instante).ToList();
+                var ultimoInstanteTratado = timeLineAgrupada.First().First().instante;
+                var eventosDoInstante = timeLineAgrupada.First().Count();
+
+                foreach (var evento in timeLineAgrupada.First())
+                {
+                    #region contabilizar o evento mais atual
+                    //var evento = this.timeLine[0];
+
+                    #region libera vagao LM
+                    if (evento.vagaoLM != null)
+                    {
+                        result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, String.Format("Vagão LM #{0} liberado", evento.vagaoLM.Idx), 0));
+                        vagoesLmLivres.Add(evento);
+                    }
+                    #endregion
+                    #region libera linha terminal
+                    else if (evento.linhaTerminal != null)
+                    {
+                        //if(evento.qtdeVagoesLiberados > 0)
+                        //{
+                        //    //evento.linhaTerminal.QtdeVagoesCarregados += evento.qtdeVagoesLiberados;
+                        //    var mensagem = String.Format("Terminal {0}: fim de carga [{1} vagões)", evento.linhaTerminal.Nome, evento.qtdeVagoesLiberados);
+                        //    result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, mensagem , 1));
+                        //}
+                        //else if(evento.qtdeVagoesLiberados < 0)
+                        //{
+                        //    //evento.linhaTerminal.QtdeVagoesVazios += -1 * evento.qtdeVagoesLiberados;
+                        //    var mensagem = String.Format("Terminal {0}: fim de descarga [{1} vagões)", evento.linhaTerminal.Nome, -1 * evento.qtdeVagoesLiberados);
+                        //    result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, mensagem, 1));
+                        //}
+                        //else
+                        //{
+                        //    result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, String.Format("Terminal {0} disponível", evento.linhaTerminal.Nome), 0));
+                        //    linhasTerminaisLivres.Add(evento);
+                        //}
+
+                        result.rows.Add(new ResultadoOtimizaDataRow(evento.instante,
+                            String.Format("Terminal {0} disponível [{1};{2}]",
+                                evento.linhaTerminal.Nome,
+                                evento.linhaTerminal.vagoesCarregadosAtual,
+                                evento.linhaTerminal.vagoesVaziosAtual), 0));
+
+                        linhasTerminaisLivres.Add(evento);
+
+                    }
+                    #endregion
+                    #region contabiliza carregamento
+                    //else if (evento.carregamento != null)
+                    //{
+                    //    eventosPendentes.Add(evento);
+                    //} 
+                    #endregion
+                    #region contabiliza chegada
+                    //else if (evento.chegada != null)
+                    //{
+                    //} 
+                    #endregion
+                    #region contabiliza partida
+                    //else if (evento.partida != null)
+                    //{
+                    //    //partidas ainda não são consideradas
+                    //} 
+                    #endregion
+
+                    //var ultimoInstanteTratado = evento.instante;
+                    //this.timeLine.RemoveAt(0); //removo o evento que foi tratado
+                    //this.timeLine.Remove(evento);
+                    #endregion
+                }
+
+                this.timeLine.RemoveRange(0, eventosDoInstante);
+
+                //if(this.timeLine.Any() == false || this.timeLine[0].instante > ultimoInstanteTratado) {
+
+                var tarefasEmOrdem = listaDeTarefas.OrderBy(x => x.instante)
+                    .ThenBy(x => x.prioridade)
+                    //TODO: add terceira prioridade?
                     .ToList();
 
-                //Evento evento;
-
-                #region contabilizar o evento mais atual
-
-                var evento = this.timeLine[0];
-
-                #region libera vagao LM
-                if (evento.vagaoLM != null)
+                #region resolver as tarefas da fila
+                foreach (var job in tarefasEmOrdem)
                 {
-                    result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, String.Format("Vagão LM #{0} liberado",  evento.vagaoLM.Idx), 0));
-                    vagoesLmLivres.Add(evento);
-                }
-                #endregion
-                #region libera linha terminal
-                else if (evento.linhaTerminal != null)
-                {
-                    //if(evento.qtdeVagoesLiberados > 0)
-                    //{
-                    //    //evento.linhaTerminal.QtdeVagoesCarregados += evento.qtdeVagoesLiberados;
-                    //    var mensagem = String.Format("Terminal {0}: fim de carga [{1} vagões)", evento.linhaTerminal.Nome, evento.qtdeVagoesLiberados);
-                    //    result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, mensagem , 1));
-                    //}
-                    //else if(evento.qtdeVagoesLiberados < 0)
-                    //{
-                    //    //evento.linhaTerminal.QtdeVagoesVazios += -1 * evento.qtdeVagoesLiberados;
-                    //    var mensagem = String.Format("Terminal {0}: fim de descarga [{1} vagões)", evento.linhaTerminal.Nome, -1 * evento.qtdeVagoesLiberados);
-                    //    result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, mensagem, 1));
-                    //}
-                    //else
-                    //{
-                    //    result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, String.Format("Terminal {0} disponível", evento.linhaTerminal.Nome), 0));
-                    //    linhasTerminaisLivres.Add(evento);
-                    //}
-
-                    result.rows.Add(new ResultadoOtimizaDataRow(evento.instante, 
-                        String.Format("Terminal {0} disponível [{1};{2}]", 
-                            evento.linhaTerminal.Nome, 
-                            evento.linhaTerminal.vagoesCarregadosAtual, 
-                            evento.linhaTerminal.vagoesVaziosAtual), 0));
-
-                    linhasTerminaisLivres.Add(evento);
-                    
-                }
-                #endregion
-                //else if (evento.carregamento != null)
-                //{
-                //    eventosPendentes.Add(evento);
-                //}
-                //else if (evento.chegada != null)
-                //{
-                //}
-                //else if (evento.partida != null)
-                //{
-                //    //partidas ainda não são consideradas
-                //}
-
-                var ultimoInstanteTratado = evento.instante;
-                this.timeLine.RemoveAt(0); //removo o evento que foi tratado
-                #endregion
-
-                if(this.timeLine.Any() == false || this.timeLine[0].instante > ultimoInstanteTratado)
-                {
-                    var tarefasEmOrdem = listaDeTarefas.OrderBy(x => x.instante)
-                        .ThenBy(x => x.prioridade)
-                        //TODO: add terceira prioridade?
-                        .ToList();
-
-                    #region resolver as tarefas da fila
-                    foreach (var job in tarefasEmOrdem)
+                    if (job.transporte != null && ultimoInstanteTratado >= job.instante)
                     {
-                        if (job.transporte != null && ultimoInstanteTratado >= job.instante)
+                        if (job.transporte.linhaDestino != null)
                         {
-                            if (job.transporte.linhaDestino != null)
+                            #region faz o transporte e carregamento
+                            if (linhasTerminaisLivres.Any(x => x.linhaTerminal.LinhaID == job.transporte.linhaDestino.LinhaID) == false)
                             {
-                                #region faz o transporte e carregamento
-                                if (linhasTerminaisLivres.Any(x => x.linhaTerminal.LinhaID == job.transporte.linhaDestino.LinhaID) == false)
-                                {
-                                    continue; //se o terminal está ocupado
-                                }
+                                continue; //se o terminal está ocupado
+                            }
 
+                            if (vagoesLmLivres.Any() == false)
+                                continue;
+
+                            var vagaoDesignado = vagoesLmLivres[0];
+
+                            var qtdeAtualVagoesVaziosNoPatio = linhasDeManobra.Sum(x => x.vagoesVaziosAtual);
+
+                            if (qtdeAtualVagoesVaziosNoPatio < job.transporte.qtdeVagoes)
+                            {
+                                continue; //não trato o eventoAtual - não deve acontecer
+                            }
+
+                            this.FazCarregamento(vagaoDesignado, job, linhasDeManobra, ultimoInstanteTratado, result);
+
+                            //carregamento foi encaminhado, então linha e vagao não estão mais livres
+                            linhasTerminaisLivres.RemoveAll(x => x.linhaTerminal.LinhaID == job.transporte.linhaDestino.LinhaID); //apesar de usar All, só deve apagar um
+                            vagoesLmLivres.RemoveAt(0);
+
+                            #endregion
+                        }
+                        else
+                        {
+                            if (String.IsNullOrEmpty(job.transporte.linhaOrigem.NomeTerminal)) //se a linha origem é de manobra
+                            {
+                                if (job.transporte.Vazios)
+                                {
+                                    //esta tarefa nunca é criada, pois carregamentos são solicitados pela linha de destino (terminal)
+                                }
+                                else //caso contrário é uma descarga
+                                {
+                                    #region faz o transporte e encaminha o carregamento
+                                    if (linhasTerminaisLivres.Any(x => x.linhaTerminal.Capacidade >= job.transporte.qtdeVagoes) == false)
+                                    {
+                                        continue; //se o terminal está ocupado
+                                    }
+
+                                    if (vagoesLmLivres.Any() == false)
+                                        continue;
+
+                                    var vagaoLivre = vagoesLmLivres[0];
+
+                                    this.FazDescarga(vagaoLivre, job, linhasTerminaisLivres, ultimoInstanteTratado, result);
+
+                                    //carregamento foi encaminhado, então linha e vagao não estão mais livres
+                                    vagoesLmLivres.RemoveAt(0);
+                                    #endregion
+                                }
+                            }
+                            else
+                            {
+                                #region faz apenas o transporte, pois quando a linha de origem é temrinal, só tenho que voltar os vagoes para o patio e contabilizar o fluxo no terminal e no patio
                                 if (vagoesLmLivres.Any() == false)
                                     continue;
 
                                 var vagaoDesignado = vagoesLmLivres[0];
 
-                                var qtdeAtualVagoesVaziosNoPatio = linhasDeManobra.Sum(x => x.vagoesVaziosAtual);
+                                vagoesLmLivres.RemoveAt(0); //movimento foi encaminhado, então ocupo o vagao
 
-                                if (qtdeAtualVagoesVaziosNoPatio < job.transporte.qtdeVagoes)
+                                vagaoDesignado.instante = ultimoInstanteTratado.AddMinutes(this.tempoMovEntreLinhas);
+
+                                this.timeLine.Add(vagaoDesignado);
+
+                                var linhaDestino = linhasDeManobra.FirstOrDefault(x => x.vagoesVaziosAtual + x.vagoesCarregadosAtual + job.transporte.qtdeVagoes <= x.Capacidade);
+
+                                if (linhaDestino == null)
+                                    continue;
+
+                                var acao = "";
+
+                                if (job.transporte.Vazios == false)
                                 {
-                                    continue; //não trato o eventoAtual - não deve acontecer
-                                }
-
-                                this.FazCarregamento(vagaoDesignado, job, linhasDeManobra, ultimoInstanteTratado, result);
-
-                                //carregamento foi encaminhado, então linha e vagao não estão mais livres
-                                linhasTerminaisLivres.RemoveAll(x => x.linhaTerminal.LinhaID == job.transporte.linhaDestino.LinhaID); //apesar de usar All, só deve apagar um
-                                vagoesLmLivres.RemoveAt(0);
-
-                                #endregion
-                            }
-                            else
-                            {
-                                if (String.IsNullOrEmpty(job.transporte.linhaOrigem.NomeTerminal)) //se a linha origem é de manobra
-                                {
-                                    if (job.transporte.Vazios)
-                                    {
-                                        //esta tarefa nunca é criada, pois carregamentos são solicitados pela linha de destino (terminal)
-                                    }
-                                    else //caso contrário é uma descarga
-                                    {
-                                        #region faz o transporte e encaminha o carregamento
-                                        if (linhasTerminaisLivres.Any(x => x.linhaTerminal.Capacidade >= job.transporte.qtdeVagoes) == false)
-                                        {
-                                            continue; //se o terminal está ocupado
-                                        }
-
-                                        if (vagoesLmLivres.Any() == false)
-                                            continue;
-
-                                        var vagaoLivre = vagoesLmLivres[0];
-
-                                        this.FazDescarga(vagaoLivre, job, linhasTerminaisLivres, ultimoInstanteTratado, result);
-
-                                        //carregamento foi encaminhado, então linha e vagao não estão mais livres
-                                        vagoesLmLivres.RemoveAt(0);
-                                        #endregion
-                                    }
+                                    job.transporte.linhaOrigem.vagoesCarregadosAtual -= job.transporte.qtdeVagoes;
+                                    linhaDestino.vagoesCarregadosAtual += job.transporte.qtdeVagoes;
+                                    acao = String.Format("Levar {0} vagões carregados do terminal {1} para a linha {2} utilizando vagão LM #{3}",
+                                        job.transporte.qtdeVagoes,
+                                        job.transporte.linhaOrigem.Nome,
+                                        linhaDestino.Nome,
+                                        vagaoDesignado.vagaoLM.Idx);
                                 }
                                 else
                                 {
-                                    #region faz apenas o transporte, pois quando a linha de origem é temrinal, só tenho que voltar os vagoes para o patio e contabilizar o fluxo no terminal e no patio
-                                    if (vagoesLmLivres.Any() == false)
-                                        continue;
-
-                                    var vagaoDesignado = vagoesLmLivres[0];
-
-                                    vagoesLmLivres.RemoveAt(0); //movimento foi encaminhado, então ocupo o vagao
-
-                                    vagaoDesignado.instante = ultimoInstanteTratado.AddMinutes(this.tempoMovEntreLinhas);
-
-                                    this.timeLine.Add(vagaoDesignado);
-
-                                    var linhaDestino = linhasDeManobra.FirstOrDefault(x => x.vagoesVaziosAtual + x.vagoesCarregadosAtual + job.transporte.qtdeVagoes <= x.Capacidade);
-
-                                    if (linhaDestino == null)
-                                        continue;
-
-                                    var acao = "";
-
-                                    if (job.transporte.Vazios == false)
-                                    {
-                                        job.transporte.linhaOrigem.vagoesCarregadosAtual -= job.transporte.qtdeVagoes;
-                                        linhaDestino.vagoesCarregadosAtual += job.transporte.qtdeVagoes;
-                                        acao = String.Format("Levar {0} vagões carregados do terminal {1} para a linha {2} utilizando vagão LM #{3}",
-                                            job.transporte.qtdeVagoes,
-                                            job.transporte.linhaOrigem.Nome,
-                                            linhaDestino.Nome,
-                                            vagaoDesignado.vagaoLM.Idx);
-                                    }
-                                    else
-                                    {
-                                        job.transporte.linhaOrigem.vagoesVaziosAtual -= job.transporte.qtdeVagoes;
-                                        linhaDestino.vagoesVaziosAtual += job.transporte.qtdeVagoes;
-                                        acao = String.Format("Levar {0} vagões vazios do terminal {1} [{2};{3}] para a linha {4} [{5};{6}] utilizando vagão LM #{7}",
-                                            job.transporte.qtdeVagoes,
-                                            job.transporte.linhaOrigem.Nome,
-                                            job.transporte.linhaOrigem.vagoesCarregadosAtual,
-                                            job.transporte.linhaOrigem.vagoesVaziosAtual,
-                                            linhaDestino.Nome,
-                                            linhaDestino.vagoesCarregadosAtual,
-                                            linhaDestino.vagoesVaziosAtual,
-                                            vagaoDesignado.vagaoLM.Idx);
-                                    }
-
-                                    var totalDaLinha = job.transporte.linhaOrigem.vagoesCarregadosAtual + job.transporte.linhaOrigem.vagoesVaziosAtual;
-                                    if (totalDaLinha <= 0)
-                                    {
-                                        this.timeLine.Add(new Evento(job.transporte.linhaOrigem, vagaoDesignado.instante)); //linha está realmente livre assim que o vagao encerrar a movimentacao
-                                    }
-
-                                    result.rows.Add(new ResultadoOtimizaDataRow(ultimoInstanteTratado, acao, 1));
-                                    #endregion
+                                    job.transporte.linhaOrigem.vagoesVaziosAtual -= job.transporte.qtdeVagoes;
+                                    linhaDestino.vagoesVaziosAtual += job.transporte.qtdeVagoes;
+                                    acao = String.Format("Levar {0} vagões vazios do terminal {1} [{2};{3}] para a linha {4} [{5};{6}] utilizando vagão LM #{7}",
+                                        job.transporte.qtdeVagoes,
+                                        job.transporte.linhaOrigem.Nome,
+                                        job.transporte.linhaOrigem.vagoesCarregadosAtual,
+                                        job.transporte.linhaOrigem.vagoesVaziosAtual,
+                                        linhaDestino.Nome,
+                                        linhaDestino.vagoesCarregadosAtual,
+                                        linhaDestino.vagoesVaziosAtual,
+                                        vagaoDesignado.vagaoLM.Idx);
                                 }
-                            }
 
-                            job.concluida = 1;
-                        }
-                        else if (job.chegada != null && ultimoInstanteTratado >= job.chegada.HorarioChegada)
-                        {
-                            //TODO: tratar a chegada - uma chegada implica em: 
-                            //1 decidir em quais linhas de manobra alocar os vagoes
-                            //2 mais vagoes carregados que precisam ser descarregados
-                            //3 contabilizar a qtde vagoes vazios
-
-                            var qtdeVagoesAbs = Math.Abs(job.QtdeVagoesConsiderada);
-
-                            var linhaDeManobraDesignada = linhasDeManobra.FirstOrDefault(x => 
-                                x.vagoesCarregadosAtual + x.vagoesVaziosAtual + qtdeVagoesAbs <= x.Capacidade);
-
-                            if (linhaDeManobraDesignada != null)
-                            {
-                                if (job.QtdeVagoesConsiderada > 0)
+                                var totalDaLinha = job.transporte.linhaOrigem.vagoesCarregadosAtual + job.transporte.linhaOrigem.vagoesVaziosAtual;
+                                if (totalDaLinha <= 0)
                                 {
-                                    linhaDeManobraDesignada.vagoesCarregadosAtual += qtdeVagoesAbs;
-                                    //job.chegada.QtdeVagoesCarregados = 0;
-
-                                    result.rows.Add(new ResultadoOtimizaDataRow(ultimoInstanteTratado,
-                                        String.Format("Chegada {0}. Levar {1} vagões carregados para a linha {2} [{3};{4}]",
-                                        job.chegada.prefixo,
-                                        qtdeVagoesAbs,
-                                        linhaDeManobraDesignada.Nome,
-                                        linhaDeManobraDesignada.vagoesCarregadosAtual,
-                                        linhaDeManobraDesignada.vagoesVaziosAtual), 1));
-
-                                    //cria tarefa de transporte dos vagoes carregados que acabaram de chegar
-                                    listaDeTarefas.Add(new Tarefa(new Transporte(linhaDeManobraDesignada, null, job.QtdeVagoesConsiderada, false), ultimoInstanteTratado, linhaDeManobraDesignada.prioridade)); 
-                                    //timeLine.Add(new Evento(ultimoInstanteTratado));
+                                    this.timeLine.Add(new Evento(job.transporte.linhaOrigem, vagaoDesignado.instante)); //linha está realmente livre assim que o vagao encerrar a movimentacao
                                 }
 
-                                if (job.QtdeVagoesConsiderada < 0)
-                                {
-                                    linhaDeManobraDesignada.vagoesVaziosAtual += qtdeVagoesAbs;
-                                    //job.chegada.QtdeVagoesVazio = 0;
-
-                                    result.rows.Add(new ResultadoOtimizaDataRow(ultimoInstanteTratado,
-                                        String.Format("Chegada {0}. Levar {1} vagões vazios para a linha {2} [{3};{4}]",
-                                        job.chegada.prefixo,
-                                        qtdeVagoesAbs,
-                                        linhaDeManobraDesignada.Nome,
-                                        linhaDeManobraDesignada.vagoesCarregadosAtual,
-                                        linhaDeManobraDesignada.vagoesVaziosAtual), 1));
-                                }
-
-                                job.concluida = 1;
+                                result.rows.Add(new ResultadoOtimizaDataRow(ultimoInstanteTratado, acao, 1));
+                                #endregion
                             }
-                            
                         }
-                        else if (job.partida != null)
-                        {
-                            job.concluida = 1;
-                        }
+
+                        job.concluida = 1;
                     }
+                    else if (job.chegada != null && ultimoInstanteTratado >= job.chegada.HorarioChegada)
+                    {
+                        //TODO: tratar a chegada - uma chegada implica em: 
+                        //1 decidir em quais linhas de manobra alocar os vagoes
+                        //2 mais vagoes carregados que precisam ser descarregados
+                        //3 contabilizar a qtde vagoes vazios
 
-                    listaDeTarefas.RemoveAll(x => x.concluida == 1);
+                        var qtdeVagoesAbs = Math.Abs(job.QtdeVagoesConsiderada);
 
-                    #endregion
-                } //fim de if
+                        var linhaDeManobraDesignada = linhasDeManobra.FirstOrDefault(x => 
+                            x.vagoesCarregadosAtual + x.vagoesVaziosAtual + qtdeVagoesAbs <= x.Capacidade);
+
+                        if (linhaDeManobraDesignada != null)
+                        {
+                            if (job.QtdeVagoesConsiderada > 0)
+                            {
+                                linhaDeManobraDesignada.vagoesCarregadosAtual += qtdeVagoesAbs;
+                                //job.chegada.QtdeVagoesCarregados = 0;
+
+                                result.rows.Add(new ResultadoOtimizaDataRow(ultimoInstanteTratado,
+                                    String.Format("Chegada {0}. Levar {1} vagões carregados para a linha {2} [{3};{4}]",
+                                    job.chegada.prefixo,
+                                    qtdeVagoesAbs,
+                                    linhaDeManobraDesignada.Nome,
+                                    linhaDeManobraDesignada.vagoesCarregadosAtual,
+                                    linhaDeManobraDesignada.vagoesVaziosAtual), 1));
+
+                                //cria tarefa de transporte dos vagoes carregados que acabaram de chegar
+                                listaDeTarefas.Add(new Tarefa(new Transporte(linhaDeManobraDesignada, null, job.QtdeVagoesConsiderada, false), ultimoInstanteTratado, linhaDeManobraDesignada.prioridade)); 
+                                //timeLine.Add(new Evento(ultimoInstanteTratado));
+                            }
+
+                            if (job.QtdeVagoesConsiderada < 0)
+                            {
+                                linhaDeManobraDesignada.vagoesVaziosAtual += qtdeVagoesAbs;
+                                //job.chegada.QtdeVagoesVazio = 0;
+
+                                result.rows.Add(new ResultadoOtimizaDataRow(ultimoInstanteTratado,
+                                    String.Format("Chegada {0}. Levar {1} vagões vazios para a linha {2} [{3};{4}]",
+                                    job.chegada.prefixo,
+                                    qtdeVagoesAbs,
+                                    linhaDeManobraDesignada.Nome,
+                                    linhaDeManobraDesignada.vagoesCarregadosAtual,
+                                    linhaDeManobraDesignada.vagoesVaziosAtual), 1));
+                            }
+
+                            job.concluida = 1;
+                        }
+                            
+                    }
+                    else if (job.partida != null)
+                    {
+                        job.concluida = 1;
+                    }
+                }
+
+                listaDeTarefas.RemoveAll(x => x.concluida == 1);
+
+                #endregion
+
             } //fim de while 
             #endregion
 
