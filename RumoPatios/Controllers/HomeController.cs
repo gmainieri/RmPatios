@@ -375,7 +375,7 @@ namespace RumoPatios.Controllers
             //vagoesLM.Sort((x, y) => x.instanteDeLiberacao.CompareTo(y.instanteDeLiberacao));
             //linhasDeCarregamento.Sort((x, y) => x.instanteDeLiberacao.CompareTo(y.instanteDeLiberacao));
 
-            #region algoritmo evento por evento
+            #region algoritmo por ultimo instante tratado
 
             linhasTerminais.Sort((x, y) => x.prioridade.CompareTo(y.prioridade));
             linhasDeManobra.Sort((x, y) => x.prioridade.CompareTo(y.prioridade));
@@ -468,15 +468,16 @@ namespace RumoPatios.Controllers
 
                 //if(this.timeLine.Any() == false || this.timeLine[0].instante > ultimoInstanteTratado) {
 
-                var tarefasEmOrdem = listaDeTarefas.OrderBy(x => x.instante)
-                    .ThenBy(x => x.prioridade)
+                var tarefasDisponiveis = listaDeTarefas.Where(job => job.instante <= ultimoInstanteTratado)
+                    .OrderBy(job => job.instante)
+                    .ThenBy(job => job.prioridade)
                     //TODO: add terceira prioridade?
                     .ToList();
 
-                #region resolver as tarefas da fila
-                foreach (var job in tarefasEmOrdem)
+                #region resolver as tarefas disponiveis da fila
+                foreach (var job in tarefasDisponiveis)
                 {
-                    if (job.transporte != null && ultimoInstanteTratado >= job.instante)
+                    if (job.transporte != null)
                     {
                         if (job.transporte.linhaDestino != null)
                         {
@@ -593,7 +594,7 @@ namespace RumoPatios.Controllers
 
                         job.concluida = 1;
                     }
-                    else if (job.chegada != null && ultimoInstanteTratado >= job.chegada.HorarioChegada)
+                    else if (job.chegada != null)
                     {
                         //TODO: tratar a chegada - uma chegada implica em: 
                         //1 decidir em quais linhas de manobra alocar os vagoes
