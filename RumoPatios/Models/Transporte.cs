@@ -6,27 +6,32 @@ using System.Web;
 namespace RumoPatios.Models
 {
     /// <summary>
-    /// Solicitação de transporte de vagoes entre linhas (terminal=>manobra ou manobra=>terminal)
+    /// Solicitação de transporte de vagoes entre linhas (terminal=>manobra ou manobra=>terminal). 
+    /// Um transporte pode ser classificado como uma tarefa/ordem/ação. 
+    /// Alguns eventos podem gerar transportes (carregamento, chegada, partida, etc).
     /// </summary>
     public class Transporte
     {
         public Transporte() { }
 
         /// <summary>
-        /// Tarefa de transporte de vagoes entre linhas (terminal->manobra ou manobra->terminal)
+        /// Transporte de vagoes entre linhas (terminal->manobra ou manobra->terminal)
         /// </summary>
         /// <param name="linhaFrom">linha origem</param>
         /// <param name="linhaTo">linha destino</param>
         /// <param name="qtde">quantidade de vagoes, se carregados, positiva, negativa caso contrário</param>
-        public Transporte(Linha linhaFrom, Linha linhaTo, int qtde, bool vazios)
+        public Transporte(Linha linhaFrom, Linha linhaTo, int qtde, bool vazios, DateTime instante, double priority)
         {
+            //evita a criacao de um transporte com as duas linhas definidas (por enquanto não existe nenuma situação na qual origem e destino são conhecidos)
             if (linhaFrom != null && linhaTo != null)
-                return; //evita a criacao de um transporte com as duas linhas definidas (por enquanto não existe nenuma situação na qual este origem e destino são conhecidos)
+                return; 
             
             this.linhaOrigem = linhaFrom;
             this.linhaDestino = linhaTo;
             this.qtdeVagoes = qtde;
             this.Vazios = vazios;
+            this.instante = instante;
+            this.prioridade = priority;
         }
 
         /// <summary>
@@ -48,6 +53,19 @@ namespace RumoPatios.Models
         /// 1 se a qtde de vagoes refere-se a vagoes vazios, zero c.c.
         /// </summary>
         public bool Vazios { get; set; }
+
+        /// <summary>
+        /// instante programado a partir do qual o transporte deve ser realizado
+        /// </summary>
+        public DateTime instante { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public double prioridade { get; set; }
+
+        public int concluido { get; set; }
+
 
     }
 }

@@ -26,5 +26,11 @@ namespace RumoPatios.Models
         [NotMapped]
         public double prioridade { get; set; }
 
+        /// <summary>
+        /// aleatorio para fracionamento de carregamentos
+        /// </summary>
+        [NotMapped]
+        public double aleatorio { get; set; }
+
     }
 }
