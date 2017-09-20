@@ -411,8 +411,8 @@ namespace RumoPatios.Controllers
             linhasTerminais.Sort((x, y) => x.prioridade.CompareTo(y.prioridade));
             linhasDeManobra.Sort((x, y) => x.prioridade.CompareTo(y.prioridade));
 
-            var vagoesLmLivres = new List<Evento>(); //TODO: trocar por lista da classe vagao LM (isso quando lista de tarefas e timeline já forem listas de objetos)
-            var linhasTerminaisLivres = new List<Evento>(); //TODO: trocar por lista da classe linha (isso quando lista de tarefas e timeline já forem listas de objetos)
+            var vagoesLmLivres = new List<Evento>(); //TODO: trocar por lista da classe vagao LM (isso quando timeline já for listas de objetos)
+            var linhasTerminaisLivres = new List<Evento>(); //TODO: trocar por lista da classe linha (isso quando timeline já for listas de objetos)
 
             while (this.timeLine.Any())
             {
