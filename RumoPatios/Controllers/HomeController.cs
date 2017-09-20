@@ -481,14 +481,15 @@ namespace RumoPatios.Controllers
                     {
                         if (job.transporte.linhaDestino != null)
                         {
-                            #region faz o transporte e carregamento
+                            //trata-se de um carregamento programado, pois conheço o terminal, mas não sei de onde devem vir os vagoes
+                            #region faz o transporte de vagoes vazios para o destino encaminha o carregamento
                             if (linhasTerminaisLivres.Any(x => x.linhaTerminal.LinhaID == job.transporte.linhaDestino.LinhaID) == false)
                             {
                                 continue; //se o terminal está ocupado
                             }
 
-                            if (vagoesLmLivres.Any() == false)
-                                continue;
+                            if (vagoesLmLivres.Any() == false) //(por enquanto estamos utilizando apenas uma LM pra fazer todos os transportes de vagoes necessários para um carregamento)
+                                continue; 
 
                             var vagaoDesignado = vagoesLmLivres[0];
 
@@ -509,6 +510,7 @@ namespace RumoPatios.Controllers
                         }
                         else
                         {
+                            #region tem-se apenas a linha de origem e precisa decidir quais os destinos
                             if (String.IsNullOrEmpty(job.transporte.linhaOrigem.NomeTerminal)) //se a linha origem é de manobra
                             {
                                 if (job.transporte.Vazios)
@@ -589,17 +591,17 @@ namespace RumoPatios.Controllers
 
                                 result.rows.Add(new ResultadoOtimizaDataRow(ultimoInstanteTratado, acao, 1));
                                 #endregion
-                            }
+                            } 
+                            #endregion
                         }
 
                         job.concluida = 1;
                     }
                     else if (job.chegada != null)
                     {
-                        //TODO: tratar a chegada - uma chegada implica em: 
-                        //1 decidir em quais linhas de manobra alocar os vagoes
-                        //2 mais vagoes carregados que precisam ser descarregados
-                        //3 contabilizar a qtde vagoes vazios
+                        //tratar a chegada - uma chegada implica em: 
+                        //1 decidir em qual linha de manobra alocar os vagoes (contabilizando as novas qtdes vagoes atuais)
+                        //2 mais vagoes carregados no patio, ou seja, mais descargas que precisam ser providenciadas
 
                         var qtdeVagoesAbs = Math.Abs(job.QtdeVagoesConsiderada);
 
@@ -665,6 +667,14 @@ namespace RumoPatios.Controllers
             return result;
         }
 
+        /// <summary>
+        /// escolhe quais linhas fornecerao os vagoes para o carregamento no terminal
+        /// </summary>
+        /// <param name="eventoVagao"></param>
+        /// <param name="job"></param>
+        /// <param name="linhasDeManobra"></param>
+        /// <param name="ultimoInstante"></param>
+        /// <param name="result"></param>
         private void FazCarregamento(Evento eventoVagao, Tarefa job, List<Linha> linhasDeManobra, DateTime ultimoInstante, ResultadoOtimizaData result)
         {
             var linhasDeManobraComVagoesVazios = linhasDeManobra.Where(x => x.vagoesVaziosAtual > 0).ToList(); //para o carregamento, só interessam as linhas que possuam vagoes vazios
@@ -715,7 +725,7 @@ namespace RumoPatios.Controllers
             #endregion
 
             eventoVagao.instante = ultimoInstante.AddMinutes(linhasUsadas * tempoMovEntreLinhas);
-            this.timeLine.Add(new Evento(eventoVagao.vagaoLM, eventoVagao.instante)); //evento de liberacao da LM
+            this.timeLine.Add(new Evento(eventoVagao.vagaoLM, eventoVagao.instante)); //evento de liberacao da LM (por enquanto estamos utilizando apenas uma LM pra fazer todos os transportes de vagoes necessários para um carregamento)
 
             job.concluida = 1;
         }
