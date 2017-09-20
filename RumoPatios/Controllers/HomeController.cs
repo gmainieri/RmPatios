@@ -46,7 +46,7 @@ namespace RumoPatios.Controllers
 
         public ActionResult Index()
         {
-            //TODO: criar o view model com todas as tabelas
+            //cria o view model com todas as tabelas
 
             this.db = new ApplicationDbContext();
 
@@ -145,13 +145,13 @@ namespace RumoPatios.Controllers
                         {
                             if (rand.NextDouble() > prob)
                             {
-                                arrival.randLoad = pai2.Chegadas[arrival.ChegadaID - 1].randLoad;
-                                arrival.randUnload = pai2.Chegadas[arrival.ChegadaID - 1].randUnload;
+                                arrival.randLoaded = pai2.Chegadas[arrival.ChegadaID - 1].randLoaded;
+                                arrival.randEmpty = pai2.Chegadas[arrival.ChegadaID - 1].randEmpty;
                             }
                             else
                             {
-                                arrival.randLoad = pai1.Chegadas[0].randLoad;
-                                arrival.randUnload = pai1.Chegadas[0].randUnload;
+                                arrival.randLoaded = pai1.Chegadas[0].randLoaded;
+                                arrival.randEmpty = pai1.Chegadas[0].randEmpty;
                             }
                         }
 
@@ -220,8 +220,8 @@ namespace RumoPatios.Controllers
         {
             foreach (var arrival in result.Chegadas)
             {
-                arrival.randLoad = 0.10 + (0.50 * this.rand.NextDouble()); //blocos dos vagoes carregados, mínimo 10%, máximo 60%
-                arrival.randUnload = 0.25 + (0.75 * this.rand.NextDouble()); //blocos dos vagoes vazios, mínimo 25%, máximo 75%
+                arrival.randLoaded = 0.10 + (0.50 * this.rand.NextDouble()); //blocos dos vagoes carregados, mínimo 10%, máximo 60%
+                arrival.randEmpty = 0.25 + (0.75 * this.rand.NextDouble()); //blocos dos vagoes vazios, mínimo 25%, máximo 75%
             }
 
             foreach (var line in result.Linhas)
@@ -299,13 +299,12 @@ namespace RumoPatios.Controllers
                 int qtdeAtual = 0;
                 int qtdeRestante = 0;
 
-                //TODO: usar este fracionamento como modelo para o fracionamento dos carregamentos (que ainda não existe)
                 #region as chegadas são divididas em blocos de Tarefas, para assim facilitar a designação dos vagoes às linhas de manobra
                 //os vagoes carregados chegam na frente do comboio, por isso prioridade 0.0 e dos vazios 1.0
                 while (loadTotal < arrival.QtdeVagoesCarregados)
                 {
                     qtdeRestante = arrival.QtdeVagoesCarregados - loadTotal;
-                    qtdeAtual = Math.Min(qtdeRestante, (int)Math.Floor(arrival.randLoad * arrival.QtdeVagoesCarregados));
+                    qtdeAtual = Math.Min(qtdeRestante, (int)Math.Floor(arrival.randLoaded * arrival.QtdeVagoesCarregados));
                     loadTotal += qtdeAtual;
 
                     timeLine.Add(new Evento(arrival, qtdeAtual, false));
@@ -315,7 +314,7 @@ namespace RumoPatios.Controllers
                 while (emptyTotal < arrival.QtdeVagoesVazio)
                 {
                     qtdeRestante = arrival.QtdeVagoesVazio - emptyTotal;
-                    qtdeAtual = Math.Min(qtdeRestante, (int)Math.Floor(arrival.randUnload * arrival.QtdeVagoesVazio));
+                    qtdeAtual = Math.Min(qtdeRestante, (int)Math.Floor(arrival.randEmpty * arrival.QtdeVagoesVazio));
                     emptyTotal += qtdeAtual;
 
                     timeLine.Add(new Evento(arrival, qtdeAtual, true));
@@ -378,19 +377,30 @@ namespace RumoPatios.Controllers
 
                 if (line.QtdeVagoesCarregados > 0)
                 {
+                    //preciso encaminhar as descarga destes vagoes carregados que estão inicialmente no patio
+                    //TODO: fracionar estas descargas (ainda não precisa, pq inicialmente não existem muitos vagoes no patio)
+                    //cria tarefas de descarga (uma para cada linha de manobra, por enquanto)
+                    //provavelmente eles vao dizer que estas descargas precisam ser fracionadas
+                    //perguntar mais ou menos quais são os tamanhos dos blocos deste tipo de fracionamento e implementar
+                    listaDeTarefas.Add(new Transporte(line, null, line.QtdeVagoesCarregados, false, instantePrimeiraTarefa, line.prioridade));
+
                     //var novaTarefaMov = new Transporte(line, null, line.QtdeVagoesCarregados, false);
                     //listaDeTarefas.Add(new Tarefa(novaTarefaMov, instantePrimeiraTarefa, line.prioridade));
                     
-                    //TODO: fracionar estas descargas
-                    listaDeTarefas.Add(new Transporte(line, null, line.QtdeVagoesCarregados, false, instantePrimeiraTarefa, line.prioridade)); //cria tarefas de descarga (uma para cada linha de manobra, por enquanto)
-                    
                 }
+
+                //if(line.QtdeVagoesVazios > 0)
+                //{
+                //    //não preciso fazer nada pq o vagoes estão vazios
+                //}
 
             }
 
-            listaDeTarefas = listaDeTarefas.OrderBy(x => x.instante)
-                .ThenBy(x => x.prioridade)
-                .ToList();
+            //listaDeTarefas = listaDeTarefas.OrderBy(x => x.instante)
+            //    .ThenBy(x => x.prioridade)
+            //    .ToList();
+
+            listaDeTarefas.Sort((x, y) => x.prioridade.CompareTo(y.prioridade));
 
             //this.timeLine.Sort((x, y) => x.instante.CompareTo(y.instante));
             //vagoesLM.Sort((x, y) => x.instanteDeLiberacao.CompareTo(y.instanteDeLiberacao));
@@ -528,7 +538,7 @@ namespace RumoPatios.Controllers
                 var tarefasDisponiveis = listaDeTarefas.Where(job => job.instante <= ultimoInstanteTratado)
                     .OrderBy(job => job.instante)
                     .ThenBy(job => job.prioridade)
-                    //TODO: add terceira prioridade?
+                    //add terceira prioridade?
                     .ToList();
 
                 #region resolver as tarefas disponiveis da fila

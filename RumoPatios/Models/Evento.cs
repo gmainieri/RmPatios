@@ -105,7 +105,7 @@ namespace RumoPatios.Models
         //internal Partida partida { get; set; }
         //#endregion 
 
-        //TODO: implementar este string só para dar uma organizada (não será usado, mas fica mais facil de entender o codigo)
+        //implementar este string só para dar uma organizada (não será usado, mas fica mais facil de entender o codigo)
         //internal string Nome { get; set; }
 
         /// <summary>
