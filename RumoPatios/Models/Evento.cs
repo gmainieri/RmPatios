@@ -18,12 +18,14 @@ namespace RumoPatios.Models
         //    this.prioridade = rnd.NextDouble();
         //}
 
-        //public Evento(Chegada _chegada, Random rnd)
-        //{
-        //    this.chegada = _chegada;
-        //    this.instante = _chegada.HorarioChegada;
-        //    this.prioridade = rnd.NextDouble();
-        //}
+        public Evento(Chegada _chegada, int qtdeVagoes, bool vagoesVazios)
+        {
+            this.chegada = _chegada;
+            this.instante = _chegada.HorarioChegada;
+            this.QtdeVagoes = qtdeVagoes;
+            this.VagoesVazios = vagoesVazios;
+            //this.prioridade = rnd.NextDouble();
+        }
 
         public Evento()
         {
@@ -95,7 +97,10 @@ namespace RumoPatios.Models
         #endregion
         
         //#region caso contrario esta ligado a algum dos eventos do banco
-        //internal Chegada chegada { get; set; }
+        public Chegada chegada { get; set; }
+        public int QtdeVagoes { get; set; }
+        public bool VagoesVazios { get; set; }
+
         //internal Carregamento carregamento { get; set; }
         //internal Partida partida { get; set; }
         //#endregion 

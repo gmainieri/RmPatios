@@ -13,21 +13,21 @@ namespace RumoPatios.Models
         #region construtores
         public Tarefa() { }
 
-        public Tarefa(Carregamento load, int qtdeVagoes)
-        {
-            this.instante = load.HorarioCarregamento;
-            this.carregamento = load;
-            this.prioridade = load.prioridade;
-            this.QtdeVagoesConsiderada = qtdeVagoes;
-        }
+        //public Tarefa(Carregamento load, int qtdeVagoes)
+        //{
+        //    this.instante = load.HorarioCarregamento;
+        //    this.carregamento = load;
+        //    this.prioridade = load.prioridade;
+        //    this.QtdeVagoesConsiderada = qtdeVagoes;
+        //}
 
-        public Tarefa(Chegada arrival, int nVagoes, double priority)
-        {
-            this.instante = arrival.HorarioChegada;
-            this.chegada = arrival;
-            this.prioridade = priority;
-            this.QtdeVagoesConsiderada = nVagoes;
-        }
+        //public Tarefa(Chegada arrival, int nVagoes, double priority)
+        //{
+        //    this.instante = arrival.HorarioChegada;
+        //    this.chegada = arrival;
+        //    this.prioridade = priority;
+        //    this.QtdeVagoesConsiderada = nVagoes;
+        //}
 
         /// <summary>
         /// Tarefas de descarga são criadas a partir dos vagoes carregados que estão inicialmente no patio e assim que novos vagoes carregados chegam atraves das Chegadas
@@ -54,7 +54,7 @@ namespace RumoPatios.Models
         /// <summary>
         /// Os carregamentos devem ser concluidos antes do instante, as chegadas devem ser tratadas a partir do instante. 
         /// </summary>
-        internal DateTime instante { get; set; }
+        public DateTime instante { get; set; }
 
         /// <summary>
         /// prioridade da tarefa
@@ -67,14 +67,13 @@ namespace RumoPatios.Models
         public int concluida { get; set; }
 
         #region tarefa esta associada a alguma das tarefas do banco
-        public Chegada chegada { get; set; }
-        /// <summary>
-        /// utilizada pelas chegadas e carregamentos, já que elas são fracionadas em varios blocos
-        /// </summary>
-        public int QtdeVagoesConsiderada { get; set; }
+        //public Chegada chegada { get; set; }
         
-        public Carregamento carregamento { get; set; }
-        public Partida partida { get; set; }
+        //utilizada pelas chegadas e carregamentos, já que elas são fracionadas em varios blocos
+        //public int QtdeVagoesConsiderada { get; set; }
+        
+        //public Carregamento carregamento { get; set; }
+        //public Partida partida { get; set; }
         //public Descarga descarga { get; set; }
         public Transporte transporte { get; set; }
         #endregion  
