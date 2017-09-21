@@ -82,8 +82,8 @@ namespace RumoPatios.Controllers
                 //int maxIndividous = 100;
                 int numGeracoes = 50;
                 int pop = 100;
-                int popElite = 20;
-                int popMutante = 20;
+                int popElite = 10;
+                int popMutante = 25;
                 double prob = 0.55;
 
                 //var parametros = new Parametros(this.db);
