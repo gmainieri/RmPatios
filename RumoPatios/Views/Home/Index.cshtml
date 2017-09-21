@@ -35,8 +35,6 @@
     </p>
 </div>
 
-
-
 <div id="tabelaPatio" class="container">
     <table class="table table-striped table-bordered table-responsive table-condensed table-hover sortable">
         <thead>
@@ -82,89 +80,7 @@
     </table>
 </div>
 
-<div id="tabelaPartidas" class="row">
-    <table class="table table-striped table-bordered table-responsive table-condensed table-hover sortable">
-        <thead>
-            <tr>
-                <th class="text-center" colspan="6" style="font-size:x-large">
-                    Partidas
-                </th>
-            </tr>
-            <tr>
-                <th>
-                    ID
-                </th>
-                <th>
-                    Prefixo
-                </th>
-                <th>
-                    Horário Partida
-                </th>
-                <th>
-                    Vagões carregados
-                </th>
-                <th>
-                    Vagões vazios
-                </th>
-            </tr>
-        </thead>
-        <tbody class="searchable">
-            @foreach (var item in Model.partidas)
-            {
-                <tr>
-                    <td>@item.PartidaID</td>
-                    <td>@item.prefixo</td>
-                    <td>@item.HorarioPartida.ToString("yyyy/MM/dd HH:mm")</td>
-                    <td>@item.QtdeVagoesCarregados</td>
-                    <td>@item.QtdeVagoesVazio</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
-
-<div id="tabelaChegadas" class="row">
-    <table class="table table-striped table-bordered table-responsive table-condensed table-hover sortable">
-        <thead>
-            <tr>
-                <th class="text-center" colspan="6" style="font-size:x-large">
-                    Chegadas
-                </th>
-            </tr>
-            <tr>
-                <th>
-                    ID
-                </th>
-                <th>
-                    Prefixo
-                </th>
-                <th>
-                    Horário Chegada
-                </th>
-                <th>
-                    Vagões carregados
-                </th>
-                <th>
-                    Vagões vazios
-                </th>
-            </tr>
-        </thead>
-        <tbody class="searchable">
-            @foreach (var item in Model.chegadas)
-            {
-                <tr>
-                    <td>@item.ChegadaID</td>
-                    <td>@item.prefixo</td>
-                    <td>@item.HorarioChegada.ToString("yyyy/MM/dd HH:mm")</td>
-                    <td>@item.QtdeVagoesCarregados</td>
-                    <td>@item.QtdeVagoesVazio</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
-
-<div id="tabelaCarregamentos" class="row">
+<div id="tabelaCarregamentos" class="container">
     <table class="table table-striped table-bordered table-responsive table-condensed table-hover sortable">
         <thead>
             <tr>
@@ -209,6 +125,87 @@
     </table>
 </div>
 
+<div id="tabelaChegadas" class="container">
+    <table class="table table-striped table-bordered table-responsive table-condensed table-hover sortable">
+        <thead>
+            <tr>
+                <th class="text-center" colspan="6" style="font-size:x-large">
+                    Chegadas
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    ID
+                </th>
+                <th>
+                    Prefixo
+                </th>
+                <th>
+                    Horário Chegada
+                </th>
+                <th>
+                    Vagões carregados
+                </th>
+                <th>
+                    Vagões vazios
+                </th>
+            </tr>
+        </thead>
+        <tbody class="searchable">
+            @foreach (var item in Model.chegadas)
+            {
+                <tr>
+                    <td>@item.ChegadaID</td>
+                    <td>@item.prefixo</td>
+                    <td>@item.HorarioChegada.ToString("yyyy/MM/dd HH:mm")</td>
+                    <td>@item.QtdeVagoesCarregados</td>
+                    <td>@item.QtdeVagoesVazio</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div id="tabelaPartidas" class="container">
+    <table class="table table-striped table-bordered table-responsive table-condensed table-hover sortable">
+        <thead>
+            <tr>
+                <th class="text-center" colspan="6" style="font-size:x-large">
+                    Partidas
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    ID
+                </th>
+                <th>
+                    Prefixo
+                </th>
+                <th>
+                    Horário Partida
+                </th>
+                <th>
+                    Vagões carregados
+                </th>
+                <th>
+                    Vagões vazios
+                </th>
+            </tr>
+        </thead>
+        <tbody class="searchable">
+            @foreach (var item in Model.partidas)
+            {
+                <tr>
+                    <td>@item.PartidaID</td>
+                    <td>@item.prefixo</td>
+                    <td>@item.HorarioPartida.ToString("yyyy/MM/dd HH:mm")</td>
+                    <td>@item.QtdeVagoesCarregados</td>
+                    <td>@item.QtdeVagoesVazio</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
 <script>
     function executaCompleto(booleano) {
