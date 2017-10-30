@@ -44,6 +44,8 @@ namespace RumoPatios.Controllers
         /// </summary>
         List<Transporte> listaDeTarefas { get; set; }
 
+        //habilitar o authorize para obrigar o usuário a fazer login
+        //[Authorize]
         public ActionResult Index()
         {
             //cria o view model com todas as tabelas
